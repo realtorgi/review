@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EduAnalysis - AI 학생 오답 분석 & 학부모 리포트 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -47,9 +52,9 @@
       </div>
       <div class="flex items-center gap-3">
         <!-- Dark Mode Toggle Button -->
-        <button id="themeToggleBtn" type="button" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 text-xs font-semibold">
-          <i id="themeIcon" class="fa-solid fa-moon text-indigo-600 dark:text-indigo-400"></i>
-          <span id="themeText" class="hidden sm:inline">야간 모드</span>
+        <button id="themeToggleBtn" type="button" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer">
+          <i id="themeIcon" class="fa-solid fa-sun text-amber-400"></i>
+          <span id="themeText" class="hidden sm:inline">주간 모드</span>
         </button>
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Gemini AI Engine Active
@@ -139,7 +144,7 @@
           <textarea id="additionalPrompt" rows="3" placeholder="예: 틀린문항: 29, 33, 39, 42번. 아이가 오답을 낸 번호 위주로 문제점을 정밀 분석해줘." class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">틀린문항 29, 33, 39, 42번이야. 아이가 오답낸 번호와 정답 사이에서 아이의 문제점을 분석해줘.</textarea>
         </div>
 
-        <button id="analyzeBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md shadow-indigo-200 dark:shadow-none transition-all flex items-center justify-center gap-2 text-sm">
+        <button id="analyzeBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md shadow-indigo-200 dark:shadow-none transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
           <i class="fa-solid fa-wand-magic-sparkles"></i> AI 영어 정밀 오답 분석 실행
         </button>
       </div>
@@ -228,7 +233,7 @@
               </h3>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">AI 분석 결과가 정확하지 않을 경우 [수정] 버튼을 눌러 직접 조정하세요.</p>
             </div>
-            <button id="addCustomQuestionBtn" class="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+            <button id="addCustomQuestionBtn" class="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer">
               <i class="fa-solid fa-plus"></i> 문항 추가
             </button>
           </div>
@@ -244,7 +249,7 @@
             <div class="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
               <i class="fa-solid fa-lightbulb"></i> AI 영어 디렉터 종합 총평 및 솔루션
             </div>
-            <button id="editAdviceBtn" class="text-xs text-indigo-300 hover:text-white underline font-semibold">
+            <button id="editAdviceBtn" class="text-xs text-indigo-300 hover:text-white underline font-semibold cursor-pointer">
               <i class="fa-solid fa-pen-to-square"></i> 총평 직접 수정
             </button>
           </div>
@@ -257,7 +262,7 @@
             <h3 class="text-base font-bold text-slate-900 dark:text-white">학부모 전송용 고급 리포트 카드를 생성하시겠습니까?</h3>
             <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">업로드하신 디자인 템플릿(상단 점수 요약, 좌우 보완점/지도계획 2열 구성, 하단 어머니께 드리는 말씀)에 맞춰 전문 그래픽 리포트를 생성합니다.</p>
           </div>
-          <button id="generateReportImgBtn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all inline-flex items-center gap-2 text-sm">
+          <button id="generateReportImgBtn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all inline-flex items-center gap-2 text-sm cursor-pointer">
             <i class="fa-solid fa-image"></i> 학부모 보고용 템플릿 맞춤 리포트 생성 (AI)
           </button>
         </div>
@@ -327,8 +332,7 @@
       return document.documentElement.classList.contains('dark');
     }
 
-    themeToggleBtn?.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
+    function updateThemeUI() {
       if (isDarkMode()) {
         themeIcon.className = 'fa-solid fa-sun text-amber-400';
         themeText.textContent = '주간 모드';
@@ -336,6 +340,14 @@
         themeIcon.className = 'fa-solid fa-moon text-indigo-600';
         themeText.textContent = '야간 모드';
       }
+    }
+
+    // Initialize Theme On Load
+    updateThemeUI();
+
+    themeToggleBtn?.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      updateThemeUI();
       if (currentAnalysisData) {
         renderRadarChart(currentAnalysisData.radarScores);
       }
@@ -669,10 +681,10 @@ JSON 스키마:
               <span class="text-[11px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
                 원인: ${q.cause}
               </span>
-              <button type="button" onclick="openEditModal(${index})" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
+              <button type="button" onclick="openEditModal(${index})" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600 cursor-pointer">
                 <i class="fa-solid fa-pen-to-square"></i> 수정
               </button>
-              <button type="button" onclick="deleteQuestion(${index})" class="text-xs font-semibold text-rose-500 hover:underline flex items-center gap-1 bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">
+              <button type="button" onclick="deleteQuestion(${index})" class="text-xs font-semibold text-rose-500 hover:underline flex items-center gap-1 bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600 cursor-pointer">
                 <i class="fa-solid fa-trash-can"></i> 삭제
               </button>
             </div>
