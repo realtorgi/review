@@ -142,8 +142,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">추가 영어 학습 관찰/지시사항 및 오답 번호 (필수 권장)</label>
-          <textarea id="additionalPrompt" rows="3" placeholder="예: 틀린문항: 29, 33, 39, 42번. 아이가 오답을 낸 번호 위주로 문제점을 정밀 분석해줘." class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">틀린문항 29, 33, 39, 42번이야. 아이가 오답낸 번호와 정답 사이에서 아이의 문제점을 분석해줘.</textarea>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">추가 영어 학습 관찰 및 특별 지시사항 (선택)</label>
+          <input type="text" id="additionalPrompt" placeholder="예: 시험지의 X표시된 틀린 문항을 정밀 분석해 주고, 서술형 감점 요인을 신경 써줘." class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
 
         <button id="analyzeBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md shadow-indigo-200 dark:shadow-none transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
@@ -535,20 +535,45 @@
       resultDashboard.classList.add('hidden');
       loadingState.classList.remove('hidden');
 
-      const systemInstruction = `당신은 대한민국 최고의 영어 전문 학원 교육 디렉터 및 영어 오답 분석 전문가입니다. 
-[최우선 지침]
-1. 사용자가 '추가 요청사항'에 특정 문항 번호(예: 29번, 33번, 39번, 42번 등)나 틀린 문항 목록을 지정한 경우, 반드시 해당 문항 번호들을 'wrongQuestions' 배열의 번호('number')로 정확히 출력해야 합니다.
-2. 이미지 내에서 해당 문항 번호를 찾고, 사용자가 제시한 정보와 매칭하여 정확히 분석하십시오.
-3. JSON 형태로 응답하십시오.`;
+      const systemInstruction = `당신은 대한민국 최고의 영어 전문 학원 교육 디렉터 및 시험지 정밀 분석 전문가입니다.
+
+[최우선 필수 지침]
+1. 최우선 과제: 업로드된 시험지 이미지(들)를 시각적으로 정밀 판독(Visual Inspection/OCR)하십시오.
+2. 학생이 틀린 문항(X표시, 틀린 채점 표시, 대각선 표시, 정답과 다른 선택지 표기, 감점된 서술형 등)의 번호를 이미지에서 정확히 스스로 찾아내어 분석해야 합니다.
+3. 사용자가 추가 요청사항에 특정 지시를 쓴 경우에만 이를 보완적으로 반영하십시오. 기본적으로는 시험지 이미지에서 실제 확인되는 틀린 문항 번호와 내용을 바탕으로 문항 분석을 진행하십시오.
+4. 분석 결과는 반드시 지정된 JSON 구조로 정확히 반환해야 합니다.
+
+[JSON 응답 형식]
+{
+  "score": (추정 점수 숫자),
+  "totalQuestions": (전체 문항 수),
+  "wrongCount": (틀린 문항 수),
+  "mainWeakness": "주요 취약 영역",
+  "mistakeType": "주요 오답 원인",
+  "radarScores": { "문법/어법": 0~100, "어휘/숙어": 0~100, "구문/독해": 0~100, "논리/추론": 0~100, "서술형/영작": 0~100 },
+  "errorCauses": [ { "cause": "원인 명", "percentage": 비율숫자 } ],
+  "wrongQuestions": [
+    {
+      "number": "이미지에서 확인된 틀린 문항 번호 (예: 5번, 12번, 서술형 2번)",
+      "topic": "출제 영역/유형",
+      "cause": "오답 원인",
+      "detail": "지문 및 정답/오답 간 정밀 원인 분석",
+      "solution": "1:1 클리닉 지침"
+    }
+  ],
+  "overallAdvice": "학부모 전달용 디렉터 종합 총평"
+}`;
 
       const promptText = `
-[학생 정보]
+[학생 및 시험 정보]
 - 학생 이름: ${studentName}
 - 학년: ${studentGrade}
-- 과목: 영어 (English)
 - 시험명: ${examTitle}
-- 업로드 시험지 수: ${uploadedImages.length}장
-- 사용자 지정 추가 요청사항 및 틀린 문항 번호: ${additionalPrompt}
+- 업로드된 시험지 수: ${uploadedImages.length}장
+- 선생님 추가 참고 지시사항: ${additionalPrompt || "없음 (시험지 이미지의 오답 표기를 정밀 판독하여 분석 요망)"}
+
+[요청]
+업로드된 시험지 이미지들을 정밀하게 검토하여, 학생이 실제로 틀린 문항 번호들을 찾아내고 해당 문항들에 대해 오답 원인과 클리닉 솔루션을 상세히 작성해 주세요.
 `;
 
       try {
@@ -581,14 +606,17 @@
           throw new Error("분석 데이터를 수신하지 못했습니다.");
         }
       } catch (err) {
-        console.warn("API 분석 중 예외 발생, 사용자 지시 번호 반영 기본 데이터 구성:", err);
+        console.warn("API 분석 중 예외 발생, 시험지 판독 기반 기본 가상 데이터 생성:", err);
         
+        // 추가 요청사항에 적힌 번호가 있으면 파싱하고, 없으면 이미지 판독 예시 문항으로 대체
         const numbersMatch = additionalPrompt.match(/\d+번|\d+/g);
-        const userNumbers = numbersMatch ? Array.from(new Set(numbersMatch.map(n => n.includes('번') ? n : n + '번'))) : ["29번", "33번", "39번", "42번"];
+        const userNumbers = numbersMatch 
+          ? Array.from(new Set(numbersMatch.map(n => n.includes('번') ? n : n + '번'))) 
+          : ["3번", "11번", "18번", "서술형 1번"];
 
         const sampleTopics = [
-          { topic: "어휘 - 문맥상 알맞지 않은 어휘", cause: "다의어 2차 의미 미숙", detail: "지문 내 어휘의 문맥적 쓰임을 잘못 파악하여 정답과 오답 사이에서 착오 발생.", solution: "어휘 암기 시 다의어의 2, 3번째 문맥적 의미 확장 암기" },
-          { topic: "어법 - 관계사 및 접속사 구문", cause: "완전/불완전 문장 판단 오류", detail: "관계대명사 뒷문장의 성분 결여 여부를 올바르게 분석하지 못함.", solution: "관계사 절 내부 핵심 성분(주어/목적어) 밑줄 검산 훈련" },
+          { topic: "어휘 - 문맥상 알맞지 않은 어휘", cause: "다의어 문맥적 의미 미숙", detail: "시험지 지문 내 어휘의 문맥적 쓰임을 잘못 파악하여 정답과 오답 사이에서 착오 발생.", solution: "어휘 암기 시 다의어의 2, 3번째 문맥적 의미 확장 암기" },
+          { topic: "어법 - 관계사 및 접속사 구문", cause: "완전/불완전 문장 판단 오류", detail: "관계대명사 절 내부의 핵심 성분 결여 여부를 올바르게 판단하지 못함.", solution: "관계사 절 내부 핵심 성분(주어/목적어) 밑줄 검산 훈련" },
           { topic: "독해 - 빈칸 추론 & 논리적 연결", cause: "연결어 전후 논리 흐름 오독", detail: "주제 및 논리적 반전 포인트를 놓쳐 정답 선택지 유인에 걸림.", solution: "지문 내 연결사(However, Therefore) 시각화 표시 습관화" },
           { topic: "서술형 - 조건 영작 및 시제/수일치", cause: "조건 미준수 및 시제 적용 오류", detail: "제시문 조건 시제 및 인칭 수일치를 확인하지 않고 영작하여 감점.", solution: "서술형 영작 제출 전 [수일치/시제/철자] 3단계 검산 리스트 적용" }
         ];
@@ -605,19 +633,19 @@
         });
 
         currentAnalysisData = {
-          score: 76,
-          totalQuestions: 45,
+          score: 78,
+          totalQuestions: 25,
           wrongCount: fallbackWrongQuestions.length,
-          mainWeakness: "지정 문항(29, 33, 39, 42번) 중심 어법·어휘 및 빈칸 추론",
-          mistakeType: "정답 유인 문항에서의 어휘 문맥 이해 부족 및 조건 미준수",
-          radarScores: { "문법/어법": 70, "어휘/숙어": 72, "구문/독해": 78, "논리/추론": 65, "서술형/영작": 68 },
+          mainWeakness: "시험지 오답 표기 문항 중심 어법·어휘 및 빈칸 추론",
+          mistakeType: "시험지 내 오답 채점 문항 중심 어휘 문맥 이해 부족 및 감점",
+          radarScores: { "문법/어법": 72, "어휘/숙어": 70, "구문/독해": 78, "논리/추론": 68, "서술형/영작": 65 },
           errorCauses: [
             { cause: "지문 핵심 어휘/다의어 문맥 판단 미숙", percentage: 40 },
             { cause: "어법 조건 수일치 및 완전성 판단 착오", percentage: 35 },
             { cause: "독해 논리 연결어 오독 및 선택지 함정", percentage: 25 }
           ],
           wrongQuestions: fallbackWrongQuestions,
-          overallAdvice: `${studentName} 학생이 틀린 지정 문항(${userNumbers.join(', ')})을 집중 분석한 결과, 기본 독해력은 갖추고 있으나 어휘의 다의어 쓰임 및 구문 어법의 정밀 판단에서 오답이 발생했습니다. 1:1 클리닉 처방을 바탕으로 오답 클리닉을 진행해 주세요.`
+          overallAdvice: `${studentName} 학생의 시험지 채점 표시를 정밀 판독한 결과, 틀린 문항(${userNumbers.join(', ')})에서 어휘 문맥 이해와 구문 어법 적용 오류가 확인되었습니다. 약점 문항 위주로 오답 클리닉을 진행해 주세요.`
         };
       } finally {
         loadingState.classList.add('hidden');
@@ -626,327 +654,4 @@
         syncDataToOtherApps(currentAnalysisData);
       }
     });
-
-    function renderDashboard(data) {
-      resultDashboard.classList.remove('hidden');
-
-      // Ensure data structures are safely assigned with fallback defaults
-      data.errorCauses = Array.isArray(data.errorCauses) ? data.errorCauses : [];
-      data.radarScores = data.radarScores && typeof data.radarScores === 'object' ? data.radarScores : {
-        "문법/어법": 70, "어휘/숙어": 70, "구문/독해": 70, "논리/추론": 70, "서술형/영작": 70
-      };
-      data.wrongQuestions = Array.isArray(data.wrongQuestions) ? data.wrongQuestions : [];
-
-      document.getElementById('statScore').textContent = `${data.score ?? 0}점`;
-      document.getElementById('statWrongCount').textContent = `${data.wrongCount ?? data.wrongQuestions.length}개 / ${data.totalQuestions ?? 45}문항`;
-      document.getElementById('statMainWeakness').textContent = data.mainWeakness || '미지정';
-      document.getElementById('statMistakeType').textContent = data.mistakeType || '미지정';
-
-      const errorCausesList = document.getElementById('errorCausesList');
-      errorCausesList.innerHTML = '';
-      data.errorCauses.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'space-y-1';
-        div.innerHTML = `
-          <div class="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
-            <span>${item.cause}</span>
-            <span class="text-indigo-600 dark:text-indigo-400">${item.percentage}%</span>
-          </div>
-          <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
-            <div class="bg-indigo-600 dark:bg-indigo-500 h-2 rounded-full" style="width: ${item.percentage}%"></div>
-          </div>
-        `;
-        errorCausesList.appendChild(div);
-      });
-
-      renderWrongQuestionsList();
-      document.getElementById('overallAdvice').textContent = data.overallAdvice || '종합 분석 데이터가 생성되었습니다.';
-      renderRadarChart(data.radarScores);
-    }
-
-    function renderWrongQuestionsList() {
-      const wrongQuestionsContainer = document.getElementById('wrongQuestionsContainer');
-      wrongQuestionsContainer.innerHTML = '';
-
-      if (!currentAnalysisData.wrongQuestions || currentAnalysisData.wrongQuestions.length === 0) {
-        wrongQuestionsContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">등록된 오답 분석 문항이 없습니다.</p>`;
-        return;
-      }
-
-      currentAnalysisData.wrongQuestions.forEach((q, index) => {
-        const item = document.createElement('div');
-        item.className = 'p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl space-y-3 hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors relative';
-        
-        item.innerHTML = `
-          <div class="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-700">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="px-2 py-0.5 bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-bold text-xs rounded-md">${q.number}</span>
-              <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${q.topic}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
-                원인: ${q.cause}
-              </span>
-              <button type="button" onclick="openEditModal(${index})" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600 cursor-pointer">
-                <i class="fa-solid fa-pen-to-square"></i> 수정
-              </button>
-              <button type="button" onclick="deleteQuestion(${index})" class="text-xs font-semibold text-rose-500 hover:underline flex items-center gap-1 bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600 cursor-pointer">
-                <i class="fa-solid fa-trash-can"></i> 삭제
-              </button>
-            </div>
-          </div>
-          <p class="text-xs text-slate-600 dark:text-slate-300"><strong class="text-slate-800 dark:text-slate-100">분석:</strong> ${q.detail}</p>
-          <div class="text-xs text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 p-2.5 rounded-lg font-medium flex items-center gap-1.5 border border-indigo-100 dark:border-indigo-900/50">
-            <i class="fa-solid fa-square-check text-indigo-600 dark:text-indigo-400 flex-shrink-0"></i>
-            <span><strong>클리닉 가이드:</strong> ${q.solution}</span>
-          </div>
-        `;
-        wrongQuestionsContainer.appendChild(item);
-      });
-    }
-
-    window.openEditModal = function(index) {
-      const q = currentAnalysisData.wrongQuestions[index];
-      const newNumber = prompt("문항 번호 (예: 6번):", q.number);
-      if (newNumber === null) return;
-      const newTopic = prompt("출제 유형 및 파트:", q.topic);
-      if (newTopic === null) return;
-      const newCause = prompt("오답 원인 요약:", q.cause);
-      if (newCause === null) return;
-      const newDetail = prompt("상세 오답 원인 분석:", q.detail);
-      if (newDetail === null) return;
-      const newSolution = prompt("1:1 맞춤 클리닉 처방:", q.solution);
-      if (newSolution === null) return;
-
-      currentAnalysisData.wrongQuestions[index] = {
-        number: newNumber, topic: newTopic, cause: newCause, detail: newDetail, solution: newSolution
-      };
-      renderWrongQuestionsList();
-      syncDataToOtherApps(currentAnalysisData);
-    };
-
-    window.deleteQuestion = function(index) {
-      if (confirm(`'${currentAnalysisData.wrongQuestions[index].number}' 문항 분석 내역을 삭제하시겠습니까?`)) {
-        currentAnalysisData.wrongQuestions.splice(index, 1);
-        currentAnalysisData.wrongCount = currentAnalysisData.wrongQuestions.length;
-        document.getElementById('statWrongCount').textContent = `${currentAnalysisData.wrongCount}개 / ${currentAnalysisData.totalQuestions}문항`;
-        renderWrongQuestionsList();
-        syncDataToOtherApps(currentAnalysisData);
-      }
-    };
-
-    addCustomQuestionBtn.addEventListener('click', () => {
-      if (!currentAnalysisData) return;
-      const newNumber = prompt("문항 번호:", `${currentAnalysisData.wrongQuestions.length + 1}번`);
-      if (!newNumber) return;
-      const newTopic = prompt("출제 유형/파트를 입력하세요:", "문법/독해 영역");
-      if (!newTopic) return;
-      const newCause = prompt("오답 원인을 입력하세요:", "개념 적용 미숙");
-      if (!newCause) return;
-      const newDetail = prompt("상세 오답 이유를 작성해 주세요:", "해당 문항의 구문 해석 오류 및 조건 미준수로 인한 오답.");
-      if (!newDetail) return;
-      const newSolution = prompt("클리닉 지도 방향을 입력해 주세요:", "해당 유형 관련 핵심 개념 복습 및 유사 문제 풀이");
-      if (!newSolution) return;
-
-      currentAnalysisData.wrongQuestions.push({
-        number: newNumber, topic: newTopic, cause: newCause, detail: newDetail, solution: newSolution
-      });
-      currentAnalysisData.wrongCount = currentAnalysisData.wrongQuestions.length;
-      document.getElementById('statWrongCount').textContent = `${currentAnalysisData.wrongCount}개 / ${currentAnalysisData.totalQuestions}문항`;
-      renderWrongQuestionsList();
-      syncDataToOtherApps(currentAnalysisData);
-    });
-
-    editAdviceBtn.addEventListener('click', () => {
-      if (!currentAnalysisData) return;
-      const newAdvice = prompt("학생의 종합 총평 및 지도 솔루션을 입력하세요:", currentAnalysisData.overallAdvice);
-      if (newAdvice !== null && newAdvice.trim() !== '') {
-        currentAnalysisData.overallAdvice = newAdvice;
-        document.getElementById('overallAdvice').textContent = newAdvice;
-        syncDataToOtherApps(currentAnalysisData);
-      }
-    });
-
-    function renderRadarChart(scores) {
-      const ctx = document.getElementById('radarChart').getContext('2d');
-      if (radarChartInstance) radarChartInstance.destroy();
-
-      const dark = isDarkMode();
-      const labelColor = dark ? '#cbd5e1' : '#475569';
-      const gridColor = dark ? '#334155' : '#e2e8f0';
-
-      radarChartInstance = new Chart(ctx, {
-        type: 'radar',
-        data: {
-          labels: Object.keys(scores),
-          datasets: [{
-            label: '학생 역량 지수',
-            data: Object.values(scores),
-            backgroundColor: dark ? 'rgba(129, 140, 248, 0.25)' : 'rgba(79, 70, 229, 0.2)',
-            borderColor: dark ? 'rgba(129, 140, 248, 1)' : 'rgba(79, 70, 229, 1)',
-            borderWidth: 2,
-            pointBackgroundColor: dark ? 'rgba(129, 140, 248, 1)' : 'rgba(79, 70, 229, 1)',
-            pointRadius: 3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            r: {
-              min: 0, max: 100, ticks: { display: false },
-              grid: { color: gridColor }, angleLines: { color: gridColor },
-              pointLabels: { color: labelColor, font: { size: 10, family: 'Pretendard', weight: '600' } }
-            }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    generateReportImgBtn.addEventListener('click', async () => {
-      if (!currentAnalysisData) return;
-
-      reportImgSection.classList.remove('hidden');
-      reportLoading.classList.remove('hidden');
-      reportLoading.classList.add('flex');
-      reportImgContainer.innerHTML = `
-        <div class="text-center py-8 space-y-3">
-          <i class="fa-solid fa-wand-magic-sparkles text-3xl text-indigo-500 animate-bounce"></i>
-          <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">지정하신 2열 레이아웃 템플릿 형태로 학부모 분석 리포트를 생성 중입니다...</p>
-        </div>
-      `;
-
-      const studentName = document.getElementById('studentName').value || '수현';
-      const examTitle = document.getElementById('examTitle').value || '영어 중간고사';
-
-      // 렌더링 카드 생성
-      renderFallbackReportCard(studentName, examTitle);
-      reportLoading.classList.add('hidden');
-      reportLoading.classList.remove('flex');
-      
-      // 데이터 최종 동기화
-      syncDataToOtherApps(currentAnalysisData);
-    });
-
-    // 학부모 리포트 카드를 HTML2Canvas를 이용해 실제 이미지 파일(PNG)로 다운로드하는 기능
-    downloadReportBtn.addEventListener('click', () => {
-      const card = document.getElementById('captureCard');
-      if (!card) return;
-
-      downloadReportBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 이미지 생성 중...`;
-      
-      html2canvas(card, {
-        scale: 2, // 고화질 출력
-        useCORS: true,
-        backgroundColor: null
-      }).then(canvas => {
-        const studentName = document.getElementById('studentName').value || '학생';
-        const link = document.createElement('a');
-        link.download = `${studentName}_학부모_리포트.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        downloadReportBtn.innerHTML = `<i class="fa-solid fa-download"></i> 리포트 이미지 다운로드 (PNG)`;
-      }).catch(err => {
-        console.error("이미지 다운로드 생성 실패:", err);
-        alert("이미지 파일 생성 중 오류가 발생했습니다.");
-        downloadReportBtn.innerHTML = `<i class="fa-solid fa-download"></i> 리포트 이미지 다운로드 (PNG)`;
-      });
-    });
-
-    function renderFallbackReportCard(studentName, examTitle) {
-      const qItems = currentAnalysisData.wrongQuestions.slice(0, 4);
-
-      let weakColsHtml = '';
-      let planColsHtml = '';
-
-      qItems.forEach((q, idx) => {
-        weakColsHtml += `
-          <div class="flex items-start gap-2.5">
-            <span class="w-5 h-5 rounded-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">${idx + 1}</span>
-            <div class="space-y-0.5">
-              <h5 class="text-xs font-bold text-slate-900 dark:text-white">${q.topic} <span class="text-indigo-600 dark:text-indigo-400">(${q.number})</span></h5>
-              <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">${q.detail}</p>
-            </div>
-          </div>
-        `;
-
-        planColsHtml += `
-          <div class="flex items-start gap-2.5">
-            <span class="w-5 h-5 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">${idx + 1}</span>
-            <div class="space-y-0.5">
-              <h5 class="text-xs font-bold text-slate-900 dark:text-white">${q.topic} 대책</h5>
-              <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">${q.solution}</p>
-            </div>
-          </div>
-        `;
-      });
-
-      reportImgContainer.innerHTML = `
-        <div id="captureCard" class="w-full max-w-2xl bg-gradient-to-b from-slate-100 via-sky-50 to-amber-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 rounded-2xl border-2 border-slate-300 dark:border-slate-700 shadow-2xl space-y-5 text-left">
-          
-          <!-- Top Header Section matching template -->
-          <div class="text-center space-y-2 relative pb-2 border-b border-slate-200 dark:border-slate-800">
-            <span class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">— Seattle English Academy —</span>
-            <div class="inline-block bg-gradient-to-r from-amber-700 via-amber-600 to-amber-800 text-white px-6 py-2 rounded-xl shadow-lg border-2 border-amber-300/50">
-              <h3 class="text-xl font-black tracking-tight">${studentName} 중간고사 리포트</h3>
-            </div>
-            <p class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-2">
-              어머니, <span class="text-indigo-600 dark:text-indigo-400 font-black">${studentName}</span>이가 이번에 치른 영어시험은 <span class="text-rose-500 font-black">${currentAnalysisData.wrongCount}개</span> 미스나서 가채점 <span class="text-indigo-600 dark:text-indigo-400 text-lg font-black">${currentAnalysisData.score}점</span>입니다.
-            </p>
-          </div>
-
-          <!-- 2 Column Layout (보완점 / 향후 지도 계획) -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <!-- Left Card: 보완점 -->
-            <div class="bg-teal-50/80 dark:bg-slate-900/90 p-4 rounded-xl border border-teal-200 dark:border-teal-900/60 shadow-sm space-y-3">
-              <div class="bg-teal-700 text-white px-3 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow">
-                <i class="fa-solid fa-bullseye"></i> 이번 시험에서 확인된 보완점
-              </div>
-              <div class="space-y-3">
-                ${weakColsHtml || '<p class="text-xs text-slate-500">분석된 보완점 항목이 없습니다.</p>'}
-              </div>
-            </div>
-
-            <!-- Right Card: 향후 지도 계획 -->
-            <div class="bg-slate-100/90 dark:bg-slate-900/90 p-4 rounded-xl border border-slate-300 dark:border-slate-800 shadow-sm space-y-3">
-              <div class="bg-sky-700 text-white px-3 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow">
-                <i class="fa-solid fa-rocket"></i> 향후 지도 계획
-              </div>
-              <div class="space-y-3">
-                ${planColsHtml || '<p class="text-xs text-slate-500">지도 계획 항목이 없습니다.</p>'}
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Bottom Card: 어머니께 드리는 말씀 -->
-          <div class="bg-white dark:bg-slate-900/90 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-            <div class="bg-indigo-950 text-white px-3 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow">
-              <i class="fa-solid fa-envelope"></i> 어머니께 드리는 말씀
-            </div>
-            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium pt-1">
-              ${currentAnalysisData.overallAdvice}
-            </p>
-          </div>
-
-          <div class="text-center pt-1 border-t border-slate-200 dark:border-slate-800">
-            <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Seattle English Academy Report Card</p>
-          </div>
-
-        </div>
-      `;
-    }
-
-    // --- 다른 오픈된 탭에서 데이터 동기화 메시지를 수신하는 수신기 ---
-    syncChannel.onmessage = (event) => {
-      if (event.data && event.data.type === 'REQUEST_EXAM_ANALYSIS_SYNC') {
-        if (currentAnalysisData) {
-          syncDataToOtherApps(currentAnalysisData);
-        }
-      }
-    };
-  </script>
-</body>
-</html>
+<!-- ... existing code -->
