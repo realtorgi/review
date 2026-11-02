@@ -12,6 +12,8 @@
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- HTML2Canvas 추가: 템플릿 리포트 카드를 실제 이미지 파일로 다운로드하기 위함 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
     body {
@@ -77,16 +79,16 @@
         <div class="space-y-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">학생 이름</label>
-            <input type="text" id="studentName" value="김민준" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="studentName" value="수현" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">학년 선택 (중1~고3)</label>
               <select id="studentGrade" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option value="중학교 1학년">중학교 1학년</option>
-                <option value="중학교 2학년" selected>중학교 2학년</option>
+                <option value="중학교 2학년">중학교 2학년</option>
                 <option value="중학교 3학년">중학교 3학년</option>
-                <option value="고등학교 1학년">고등학교 1학년</option>
+                <option value="고등학교 1학년" selected>고등학교 1학년</option>
                 <option value="고등학교 2학년">고등학교 2학년</option>
                 <option value="고등학교 3학년">고등학교 3학년</option>
               </select>
@@ -282,10 +284,10 @@
             <p class="text-xs text-slate-400 dark:text-slate-500">버튼을 클릭하면 생성된 리포트 이미지가 여기에 표시됩니다.</p>
           </div>
 
-          <div id="reportActionButtons" class="hidden flex justify-end gap-3">
-            <a id="downloadReportBtn" download="학부모_리포트.png" href="#" class="px-4 py-2 bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors">
-              <i class="fa-solid fa-download"></i> 리포트 이미지 다운로드
-            </a>
+          <div id="reportActionButtons" class="flex justify-end gap-3">
+            <button id="downloadReportBtn" type="button" class="px-5 py-2.5 bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer shadow">
+              <i class="fa-solid fa-download"></i> 리포트 이미지 다운로드 (PNG)
+            </button>
           </div>
         </div>
 
@@ -328,6 +330,9 @@
     const themeIcon = document.getElementById('themeIcon');
     const themeText = document.getElementById('themeText');
 
+    // BroadcastChannel: 오픈된 다른 앱(패턴 분석, 숙제 관리 앱)으로 즉시 실시간 데이터 전송
+    const syncChannel = new BroadcastChannel('seattle_academy_sync');
+
     function isDarkMode() {
       return document.documentElement.classList.contains('dark');
     }
@@ -342,7 +347,6 @@
       }
     }
 
-    // Initialize Theme On Load
     updateThemeUI();
 
     themeToggleBtn?.addEventListener('click', () => {
@@ -366,7 +370,7 @@
       }
     }
 
-    // --- Drag & Drop / Multi-File Input Handlers ---
+    // --- Drag & Drop Handlers ---
     dropZone.addEventListener('click', (e) => {
       if (e.target.closest('#addMoreBtn') || e.target.closest('#removeAllImgBtn') || e.target.closest('.remove-single-img')) return;
       fileInput.click();
@@ -482,6 +486,45 @@
       });
     }
 
+    // --- 데이터를 패턴 분석 및 숙제 관리 앱으로 자동 동기화하는 핵심 함수 ---
+    function syncDataToOtherApps(data) {
+      const studentName = document.getElementById('studentName').value.trim() || '수현';
+      const studentGrade = document.getElementById('studentGrade').value || '고등학교 1학년';
+      const examTitle = document.getElementById('examTitle').value || '영어 시험지';
+
+      const payload = {
+        studentName,
+        studentGrade,
+        examTitle,
+        score: data.score,
+        wrongCount: data.wrongCount,
+        totalQuestions: data.totalQuestions,
+        mainWeakness: data.mainWeakness,
+        mistakeType: data.mistakeType,
+        radarScores: data.radarScores,
+        errorCauses: data.errorCauses,
+        wrongQuestions: data.wrongQuestions,
+        overallAdvice: data.overallAdvice,
+        updatedAt: new Date().toISOString()
+      };
+
+      // 1. LocalStorage에 학생별로 저장 (패턴 분석 및 숙제 앱에서 즉시 접근 가능)
+      let allRecords = JSON.parse(localStorage.getItem('seattle_student_exam_records') || '{}');
+      if (!allRecords[studentName]) {
+        allRecords[studentName] = [];
+      }
+      allRecords[studentName].unshift(payload); // 최신 데이터가 앞으로 오게 저장
+      localStorage.setItem('seattle_student_exam_records', JSON.stringify(allRecords));
+
+      // 2. BroadcastChannel을 통해 실시간 메시지 발송
+      syncChannel.postMessage({
+        type: 'NEW_EXAM_ANALYSIS',
+        data: payload
+      });
+
+      console.log('✅ 데이터가 패턴 오답 분석 앱 및 숙제 관리 앱으로 자동 전송되었습니다:', payload);
+    }
+
     analyzeBtn.addEventListener('click', async () => {
       const studentName = document.getElementById('studentName').value || '학생';
       const studentGrade = document.getElementById('studentGrade').value || '중학교 2학년';
@@ -494,9 +537,9 @@
 
       const systemInstruction = `당신은 대한민국 최고의 영어 전문 학원 교육 디렉터 및 영어 오답 분석 전문가입니다. 
 [최우선 지침]
-1. 사용자가 '추가 요청사항'에 특정 문항 번호(예: 29번, 33번, 39번, 42번 등)나 틀린 문항 목록을 지정한 경우, 반드시 **해당 문항 번호들을 'wrongQuestions' 배열의 번호('number')로 정확히 출력**해야 합니다. 절대 임의의 번호(3번, 8번 등)로 변경하지 마십시오.
+1. 사용자가 '추가 요청사항'에 특정 문항 번호(예: 29번, 33번, 39번, 42번 등)나 틀린 문항 목록을 지정한 경우, 반드시 해당 문항 번호들을 'wrongQuestions' 배열의 번호('number')로 정확히 출력해야 합니다.
 2. 이미지 내에서 해당 문항 번호를 찾고, 사용자가 제시한 정보와 매칭하여 정확히 분석하십시오.
-3. 중학교 1학년부터 고등학교 3학년까지 수준에 맞춰 JSON 형태의 세부 진단 데이터를 정확히 반환하십시오.`;
+3. JSON 형태로 응답하십시오.`;
 
       const promptText = `
 [학생 정보]
@@ -505,54 +548,14 @@
 - 과목: 영어 (English)
 - 시험명: ${examTitle}
 - 업로드 시험지 수: ${uploadedImages.length}장
-- **사용자 지정 추가 요청사항 및 틀린 문항 번호 (최우선 반영)**: ${additionalPrompt}
-
-[분석 요구사항]
-1. '추가 요청사항'에 적힌 틀린 문항 번호(예: 29, 33, 39, 42번 등)를 반드시 'wrongQuestions' 목록의 번호('number')로 직접 사용하십시오.
-2. 각 문항별로 출제 파트(topic), 오답 원인(cause), 세부 분석(detail), 1:1 클리닉 처방(solution)을 구체적으로 제공하십시오.
-3. 응답은 오직 아래 JSON 구조만 반환해야 합니다.
-
-JSON 스키마:
-{
-  "score": 78,
-  "totalQuestions": 45,
-  "wrongCount": 4,
-  "mainWeakness": "사용자가 지정한 문항 기반 핵심 취약점",
-  "mistakeType": "주요 오답 원인 요약",
-  "radarScores": {
-    "문법/어법": 70,
-    "어휘/숙어": 75,
-    "구문/독해": 82,
-    "논리/추론": 68,
-    "서술형/영작": 65
-  },
-  "errorCauses": [
-    { "cause": "원인 요인 1", "percentage": 40 },
-    { "cause": "원인 요인 2", "percentage": 35 },
-    { "cause": "원인 요인 3", "percentage": 25 }
-  ],
-  "wrongQuestions": [
-    {
-      "number": "29번",
-      "topic": "어법 - 관계대명사/관계부사",
-      "cause": "문장 구조 분석 착오",
-      "detail": "지문 분석...",
-      "solution": "클리닉 처방..."
-    }
-  ],
-  "overallAdvice": "${studentName} 학생에 대한 종합 피드백..."
-}
+- 사용자 지정 추가 요청사항 및 틀린 문항 번호: ${additionalPrompt}
 `;
 
       try {
         let parts = [{ text: promptText }];
-        
         uploadedImages.forEach(img => {
           parts.push({
-            inlineData: {
-              mimeType: "image/png",
-              data: img.base64
-            }
+            inlineData: { mimeType: "image/png", data: img.base64 }
           });
         });
 
@@ -562,9 +565,7 @@ JSON 스키마:
         const payload = {
           contents: [{ parts }],
           systemInstruction: { parts: [{ text: systemInstruction }] },
-          generationConfig: {
-            responseMimeType: "application/json"
-          }
+          generationConfig: { responseMimeType: "application/json" }
         };
 
         const result = await fetchWithRetry(apiUrl, {
@@ -582,7 +583,6 @@ JSON 스키마:
       } catch (err) {
         console.warn("API 분석 중 예외 발생, 사용자 지시 번호 반영 기본 데이터 구성:", err);
         
-        // Extract specified question numbers from prompt if present
         const numbersMatch = additionalPrompt.match(/\d+번|\d+/g);
         const userNumbers = numbersMatch ? Array.from(new Set(numbersMatch.map(n => n.includes('번') ? n : n + '번'))) : ["29번", "33번", "39번", "42번"];
 
@@ -622,18 +622,26 @@ JSON 스키마:
       } finally {
         loadingState.classList.add('hidden');
         renderDashboard(currentAnalysisData);
+        // 분석 완료 즉시 다른 앱으로 데이터 전송
+        syncDataToOtherApps(currentAnalysisData);
       }
     });
 
     function renderDashboard(data) {
       resultDashboard.classList.remove('hidden');
 
-      document.getElementById('statScore').textContent = `${data.score}점`;
-      document.getElementById('statWrongCount').textContent = `${data.wrongCount}개 / ${data.totalQuestions}문항`;
-      document.getElementById('statMainWeakness').textContent = data.mainWeakness;
-      document.getElementById('statMistakeType').textContent = data.mistakeType;
+      // Ensure data structures are safely assigned with fallback defaults
+      data.errorCauses = Array.isArray(data.errorCauses) ? data.errorCauses : [];
+      data.radarScores = data.radarScores && typeof data.radarScores === 'object' ? data.radarScores : {
+        "문법/어법": 70, "어휘/숙어": 70, "구문/독해": 70, "논리/추론": 70, "서술형/영작": 70
+      };
+      data.wrongQuestions = Array.isArray(data.wrongQuestions) ? data.wrongQuestions : [];
 
-      // Render Error Causes Progress Bars
+      document.getElementById('statScore').textContent = `${data.score ?? 0}점`;
+      document.getElementById('statWrongCount').textContent = `${data.wrongCount ?? data.wrongQuestions.length}개 / ${data.totalQuestions ?? 45}문항`;
+      document.getElementById('statMainWeakness').textContent = data.mainWeakness || '미지정';
+      document.getElementById('statMistakeType').textContent = data.mistakeType || '미지정';
+
       const errorCausesList = document.getElementById('errorCausesList');
       errorCausesList.innerHTML = '';
       data.errorCauses.forEach(item => {
@@ -652,18 +660,16 @@ JSON 스키마:
       });
 
       renderWrongQuestionsList();
-
-      document.getElementById('overallAdvice').textContent = data.overallAdvice;
+      document.getElementById('overallAdvice').textContent = data.overallAdvice || '종합 분석 데이터가 생성되었습니다.';
       renderRadarChart(data.radarScores);
     }
 
-    // Interactive 1:1 Item Editing Renderer
     function renderWrongQuestionsList() {
       const wrongQuestionsContainer = document.getElementById('wrongQuestionsContainer');
       wrongQuestionsContainer.innerHTML = '';
 
       if (!currentAnalysisData.wrongQuestions || currentAnalysisData.wrongQuestions.length === 0) {
-        wrongQuestionsContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">등록된 오답 분석 문항이 없습니다. [+ 문항 추가] 버튼으로 등록하세요.</p>`;
+        wrongQuestionsContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">등록된 오답 분석 문항이 없습니다.</p>`;
         return;
       }
 
@@ -703,9 +709,9 @@ JSON 스키마:
       const q = currentAnalysisData.wrongQuestions[index];
       const newNumber = prompt("문항 번호 (예: 6번):", q.number);
       if (newNumber === null) return;
-      const newTopic = prompt("출제 유형 및 파트 (예: 어법 - 주격 관계대명사):", q.topic);
+      const newTopic = prompt("출제 유형 및 파트:", q.topic);
       if (newTopic === null) return;
-      const newCause = prompt("오답 원인 요약 (예: 수일치 실수):", q.cause);
+      const newCause = prompt("오답 원인 요약:", q.cause);
       if (newCause === null) return;
       const newDetail = prompt("상세 오답 원인 분석:", q.detail);
       if (newDetail === null) return;
@@ -713,13 +719,10 @@ JSON 스키마:
       if (newSolution === null) return;
 
       currentAnalysisData.wrongQuestions[index] = {
-        number: newNumber,
-        topic: newTopic,
-        cause: newCause,
-        detail: newDetail,
-        solution: newSolution
+        number: newNumber, topic: newTopic, cause: newCause, detail: newDetail, solution: newSolution
       };
       renderWrongQuestionsList();
+      syncDataToOtherApps(currentAnalysisData);
     };
 
     window.deleteQuestion = function(index) {
@@ -728,12 +731,13 @@ JSON 스키마:
         currentAnalysisData.wrongCount = currentAnalysisData.wrongQuestions.length;
         document.getElementById('statWrongCount').textContent = `${currentAnalysisData.wrongCount}개 / ${currentAnalysisData.totalQuestions}문항`;
         renderWrongQuestionsList();
+        syncDataToOtherApps(currentAnalysisData);
       }
     };
 
     addCustomQuestionBtn.addEventListener('click', () => {
       if (!currentAnalysisData) return;
-      const newNumber = prompt("문항 번호 (예: 12번):", `${currentAnalysisData.wrongQuestions.length + 1}번`);
+      const newNumber = prompt("문항 번호:", `${currentAnalysisData.wrongQuestions.length + 1}번`);
       if (!newNumber) return;
       const newTopic = prompt("출제 유형/파트를 입력하세요:", "문법/독해 영역");
       if (!newTopic) return;
@@ -741,19 +745,16 @@ JSON 스키마:
       if (!newCause) return;
       const newDetail = prompt("상세 오답 이유를 작성해 주세요:", "해당 문항의 구문 해석 오류 및 조건 미준수로 인한 오답.");
       if (!newDetail) return;
-      const newSolution = prompt("클리닉 지도 방향을 입력해 주세요:", "해당 유형 관련 핵심 개념 복습 및 유사 문제 10문항 풀이");
+      const newSolution = prompt("클리닉 지도 방향을 입력해 주세요:", "해당 유형 관련 핵심 개념 복습 및 유사 문제 풀이");
       if (!newSolution) return;
 
       currentAnalysisData.wrongQuestions.push({
-        number: newNumber,
-        topic: newTopic,
-        cause: newCause,
-        detail: newDetail,
-        solution: newSolution
+        number: newNumber, topic: newTopic, cause: newCause, detail: newDetail, solution: newSolution
       });
       currentAnalysisData.wrongCount = currentAnalysisData.wrongQuestions.length;
       document.getElementById('statWrongCount').textContent = `${currentAnalysisData.wrongCount}개 / ${currentAnalysisData.totalQuestions}문항`;
       renderWrongQuestionsList();
+      syncDataToOtherApps(currentAnalysisData);
     });
 
     editAdviceBtn.addEventListener('click', () => {
@@ -762,6 +763,7 @@ JSON 스키마:
       if (newAdvice !== null && newAdvice.trim() !== '') {
         currentAnalysisData.overallAdvice = newAdvice;
         document.getElementById('overallAdvice').textContent = newAdvice;
+        syncDataToOtherApps(currentAnalysisData);
       }
     });
 
@@ -792,20 +794,12 @@ JSON 스키마:
           maintainAspectRatio: false,
           scales: {
             r: {
-              min: 0,
-              max: 100,
-              ticks: { display: false },
-              grid: { color: gridColor },
-              angleLines: { color: gridColor },
-              pointLabels: {
-                color: labelColor,
-                font: { size: 10, family: 'Pretendard', weight: '600' }
-              }
+              min: 0, max: 100, ticks: { display: false },
+              grid: { color: gridColor }, angleLines: { color: gridColor },
+              pointLabels: { color: labelColor, font: { size: 10, family: 'Pretendard', weight: '600' } }
             }
           },
-          plugins: {
-            legend: { display: false }
-          }
+          plugins: { legend: { display: false } }
         }
       });
     }
@@ -822,78 +816,42 @@ JSON 스키마:
           <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">지정하신 2열 레이아웃 템플릿 형태로 학부모 분석 리포트를 생성 중입니다...</p>
         </div>
       `;
-      reportActionButtons.classList.add('hidden');
 
-      const studentName = document.getElementById('studentName').value || '학생';
+      const studentName = document.getElementById('studentName').value || '수현';
       const examTitle = document.getElementById('examTitle').value || '영어 중간고사';
 
-      // Map wrong questions into 4 specific weak points
-      const weakPointsList = currentAnalysisData.wrongQuestions.slice(0, 4).map((q, idx) => {
-        return `${idx + 1}. ${q.topic} (${q.number}): ${q.detail}`;
-      }).join('\n');
+      // 렌더링 카드 생성
+      renderFallbackReportCard(studentName, examTitle);
+      reportLoading.classList.add('hidden');
+      reportLoading.classList.remove('flex');
+      
+      // 데이터 최종 동기화
+      syncDataToOtherApps(currentAnalysisData);
+    });
 
-      const solutionsList = currentAnalysisData.wrongQuestions.slice(0, 4).map((q, idx) => {
-        return `${idx + 1}. ${q.topic} 솔루션: ${q.solution}`;
-      }).join('\n');
+    // 학부모 리포트 카드를 HTML2Canvas를 이용해 실제 이미지 파일(PNG)로 다운로드하는 기능
+    downloadReportBtn.addEventListener('click', () => {
+      const card = document.getElementById('captureCard');
+      if (!card) return;
 
-      const imagePrompt = `
-        Create a professional educational diagnostic report graphic poster image for an English Academy in exact structure based on a provided layout style.
-        Top Header:
-        - Academy Banner Name: "Seattle English Academy" at very top center.
-        - Laurel wreath framed title badge: "[${studentName}] ${examTitle} 리포트" in golden brown bevel badge.
-        - Subheading below title in clear bold Korean text: "어머니, ${studentName}이가 이번에 치른 영어시험은 ${currentAnalysisData.wrongCount}개 미스나서 가채점 ${currentAnalysisData.score}점입니다."
-
-        Two Column Body Section:
-        - Left Column Header: Blue target badge "이번 시험에서 확인된 보완점"
-        - Left Column Items (Numbered 1 to 4 with dark circle numbers):
-          ${weakPointsList}
-
-        - Right Column Header: Rocket badge "향후 지도 계획"
-        - Right Column Items (Numbered 1 to 4 with gold/orange circle numbers):
-          ${solutionsList}
-
-        Bottom Full-Width Card:
-        - Header badge: Envelope icon "어머니께 드리는 말씀"
-        - Text Paragraph: "${currentAnalysisData.overallAdvice}"
-
-        Visual Style: Premium academy report graphic layout, exact vertical symmetry, dark navy top bar with text "SEATTLE ENGLISH ACADEMY", dark metallic blue and teal gradient card frames, crisp Korean typography, elegant paper/subtle texture background, professional educational presentation. High resolution readable text.
-      `;
-
-      try {
-        const apiKey = "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-        const payload = {
-          contents: [{
-            parts: [{ text: imagePrompt }]
-          }]
-        };
-
-        const result = await fetchWithRetry(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const imagePart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-
-        if (imagePart && imagePart.inlineData) {
-          const imgUrl = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
-          reportImgContainer.innerHTML = `
-            <img src="${imgUrl}" alt="영어 학부모 맞춤 리포트 이미지" class="max-w-full rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-          `;
-          downloadReportBtn.href = imgUrl;
-          reportActionButtons.classList.remove('hidden');
-        } else {
-          throw new Error("이미지 데이터 생성 미지원 및 실패");
-        }
-      } catch (err) {
-        console.warn("리포트 이미지 생성 실패 fallback:", err);
-        renderFallbackReportCard(studentName, examTitle);
-      } finally {
-        reportLoading.classList.add('hidden');
-        reportLoading.classList.remove('flex');
-      }
+      downloadReportBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 이미지 생성 중...`;
+      
+      html2canvas(card, {
+        scale: 2, // 고화질 출력
+        useCORS: true,
+        backgroundColor: null
+      }).then(canvas => {
+        const studentName = document.getElementById('studentName').value || '학생';
+        const link = document.createElement('a');
+        link.download = `${studentName}_학부모_리포트.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        downloadReportBtn.innerHTML = `<i class="fa-solid fa-download"></i> 리포트 이미지 다운로드 (PNG)`;
+      }).catch(err => {
+        console.error("이미지 다운로드 생성 실패:", err);
+        alert("이미지 파일 생성 중 오류가 발생했습니다.");
+        downloadReportBtn.innerHTML = `<i class="fa-solid fa-download"></i> 리포트 이미지 다운로드 (PNG)`;
+      });
     });
 
     function renderFallbackReportCard(studentName, examTitle) {
@@ -979,8 +937,16 @@ JSON 스키마:
 
         </div>
       `;
-      reportActionButtons.classList.add('hidden');
     }
+
+    // --- 다른 오픈된 탭에서 데이터 동기화 메시지를 수신하는 수신기 ---
+    syncChannel.onmessage = (event) => {
+      if (event.data && event.data.type === 'REQUEST_EXAM_ANALYSIS_SYNC') {
+        if (currentAnalysisData) {
+          syncDataToOtherApps(currentAnalysisData);
+        }
+      }
+    };
   </script>
 </body>
 </html>
