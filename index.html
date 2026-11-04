@@ -643,27 +643,43 @@
 
     // Seamless Examination Analysis & Parent Report Generation
     analyzeBtn.addEventListener('click', () => {
-      emptyState.classList.add('hidden');
-      analysisDashboard.classList.add('hidden');
-      parentReportContainer.classList.add('hidden');
-      viewTabs.classList.add('hidden');
-      loadingState.classList.remove('hidden');
+      try {
+        emptyState.classList.add('hidden');
+        analysisDashboard.classList.add('hidden');
+        parentReportContainer.classList.add('hidden');
+        viewTabs.classList.add('hidden');
+        loadingState.classList.remove('hidden');
 
-      setTimeout(() => {
-        currentAnalysisData = generateAnalysisResult();
-        renderAnalysisAndReport(currentAnalysisData);
+        setTimeout(() => {
+          try {
+            currentAnalysisData = generateAnalysisResult();
+            renderAnalysisAndReport(currentAnalysisData);
 
-        loadingState.classList.add('hidden');
-        viewTabs.classList.remove('hidden');
-        parentReportContainer.classList.remove('hidden');
-        tabReportBtn.click();
-      }, 900);
+            loadingState.classList.add('hidden');
+            viewTabs.classList.remove('hidden');
+            parentReportContainer.classList.remove('hidden');
+            tabReportBtn.click();
+          } catch (err) {
+            console.error("Analysis generation error:", err);
+            loadingState.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            alert("리포트 생성 중 오류가 발생했습니다. 입력 정보를 확인해 주세요.");
+          }
+        }, 900);
+      } catch (err) {
+        console.error("Button click error:", err);
+      }
     });
 
     function generateAnalysisResult() {
-      const studentName = document.getElementById('studentName').value || "유진";
-      const additionalPrompt = document.getElementById('additionalPrompt').value || "";
-      const examDetail = examDetailSelect.value || "중간고사";
+      const studentNameElem = document.getElementById('studentName');
+      const studentName = studentNameElem ? (studentNameElem.value || "유진") : "유진";
+      
+      const promptElem = document.getElementById('additionalPrompt');
+      const additionalPrompt = promptElem ? (promptElem.value || "") : "";
+
+      const detailElem = document.getElementById('examDetailSelect');
+      const examDetail = detailElem ? (detailElem.value || "중간고사") : "중간고사";
 
       // '만점', '100', '오답 없음' 감지
       const isPerfectScore = /만점|100|오답\s*없음|다\s*맞/i.test(additionalPrompt);
@@ -689,7 +705,7 @@
         };
       }
 
-      // 기본 (이미지와 유사한 89점 / 3개 오답 기준)
+      // 기본 (89점 / 3개 오답 기준)
       return {
         score: 89,
         wrongCount: 3,
@@ -711,74 +727,98 @@
     }
 
     function renderAnalysisAndReport(data) {
-      const studentName = document.getElementById('studentName').value || "유진";
-      const examDetail = examDetailSelect.value || "영어중간고사";
+      const studentNameElem = document.getElementById('studentName');
+      const studentName = studentNameElem ? (studentNameElem.value || "유진") : "유진";
+      const examDetail = examDetailSelect ? (examDetailSelect.value || "영어중간고사") : "영어중간고사";
 
       // 1. Fill Editable Parent Report Card
-      document.getElementById('rptStudentTitleName').textContent = studentName;
-      document.getElementById('rptExamNameTitle').textContent = examDetail;
-      document.getElementById('rptSubName').textContent = studentName;
-      document.getElementById('rptSubExam').textContent = examDetail;
-      document.getElementById('rptSubScoreText').textContent = data.scoreText;
+      const rptStudentTitleName = document.getElementById('rptStudentTitleName');
+      if (rptStudentTitleName) rptStudentTitleName.textContent = studentName;
+      
+      const rptExamNameTitle = document.getElementById('rptExamNameTitle');
+      if (rptExamNameTitle) rptExamNameTitle.textContent = examDetail;
+      
+      const rptSubName = document.getElementById('rptSubName');
+      if (rptSubName) rptSubName.textContent = studentName;
+      
+      const rptSubExam = document.getElementById('rptSubExam');
+      if (rptSubExam) rptSubExam.textContent = examDetail;
+      
+      const rptSubScoreText = document.getElementById('rptSubScoreText');
+      if (rptSubScoreText) rptSubScoreText.textContent = data.scoreText;
 
       // Strengths List
       const strengthList = document.getElementById('strengthList');
-      strengthList.innerHTML = '';
-      data.strengths.forEach(st => {
-        const div = document.createElement('div');
-        div.className = "space-y-1";
-        div.innerHTML = `
-          <div class="flex items-start gap-2 font-bold text-xs sm:text-sm text-amber-100">
-            <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
-            <span contenteditable="true">${st.title}</span>
-          </div>
-          <p contenteditable="true" class="text-[11px] sm:text-xs text-slate-300 pl-5 leading-relaxed">${st.desc}</p>
-        `;
-        strengthList.appendChild(div);
-      });
-      document.getElementById('strengthFooterMessage').textContent = data.strengthFooter;
+      if (strengthList) {
+        strengthList.innerHTML = '';
+        data.strengths.forEach(st => {
+          const div = document.createElement('div');
+          div.className = "space-y-1";
+          div.innerHTML = `
+            <div class="flex items-start gap-2 font-bold text-xs sm:text-sm text-indigo-200">
+              <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+              <span contenteditable="true">${st.title}</span>
+            </div>
+            <p contenteditable="true" class="text-[11px] sm:text-xs text-slate-400 pl-5 leading-relaxed">${st.desc}</p>
+          `;
+          strengthList.appendChild(div);
+        });
+      }
+      const strengthFooterMessage = document.getElementById('strengthFooterMessage');
+      if (strengthFooterMessage) strengthFooterMessage.textContent = data.strengthFooter;
 
       // Plans List
       const planList = document.getElementById('planList');
-      planList.innerHTML = '';
-      data.plans.forEach(pl => {
-        const div = document.createElement('div');
-        div.className = "space-y-1.5";
-        div.innerHTML = `
-          <div class="bg-amber-400/20 px-3 py-1 rounded-lg border border-amber-400/50 text-xs sm:text-sm font-bold text-amber-200" contenteditable="true">
-            ${pl.title}
-          </div>
-          <div class="flex items-start gap-2 pl-2 text-[11px] sm:text-xs text-slate-300">
-            <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
-            <span contenteditable="true">${pl.desc}</span>
-          </div>
-        `;
-        planList.appendChild(div);
-      });
-      document.getElementById('planFooterMessage').textContent = data.planFooter;
+      if (planList) {
+        planList.innerHTML = '';
+        data.plans.forEach(pl => {
+          const div = document.createElement('div');
+          div.className = "space-y-1.5";
+          div.innerHTML = `
+            <div class="bg-indigo-950/80 px-3 py-1.5 rounded-lg border border-indigo-800/60 text-xs sm:text-sm font-bold text-indigo-200" contenteditable="true">
+              ${pl.title}
+            </div>
+            <div class="flex items-start gap-2 pl-2 text-[11px] sm:text-xs text-slate-300">
+              <i class="fa-solid fa-circle-check text-indigo-400 mt-0.5"></i>
+              <span contenteditable="true">${pl.desc}</span>
+            </div>
+          `;
+          planList.appendChild(div);
+        });
+      }
+      const planFooterMessage = document.getElementById('planFooterMessage');
+      if (planFooterMessage) planFooterMessage.textContent = data.planFooter;
 
       // Mother Comment
-      document.getElementById('motherComment').textContent = data.motherComment;
+      const motherComment = document.getElementById('motherComment');
+      if (motherComment) motherComment.textContent = data.motherComment;
 
       // 2. Fill Analysis Dashboard
-      document.getElementById('statScore').textContent = `${data.score}점`;
-      document.getElementById('statWrongCount').textContent = `${data.wrongCount}개`;
-      document.getElementById('statWrongStatus').textContent = data.wrongCount === 0 ? "만점 (오답 0개)" : "3개 감지됨";
+      const statScore = document.getElementById('statScore');
+      if (statScore) statScore.textContent = `${data.score}점`;
+
+      const statWrongCount = document.getElementById('statWrongCount');
+      if (statWrongCount) statWrongCount.textContent = `${data.wrongCount}개`;
+
+      const statWrongStatus = document.getElementById('statWrongStatus');
+      if (statWrongStatus) statWrongStatus.textContent = data.wrongCount === 0 ? "만점 (오답 0개)" : "3개 감지됨";
       
       const causesContainer = document.getElementById('errorCausesList');
-      causesContainer.innerHTML = '';
-      data.strengths.forEach(item => {
-        const div = document.createElement('div');
-        div.className = "p-3 bg-indigo-950/40 rounded-xl border border-indigo-900/60 space-y-1";
-        div.innerHTML = `
-          <div class="flex items-center justify-between text-xs font-bold text-slate-200">
-            <span>${item.title}</span>
-            <span class="text-amber-400 font-extrabold">강점 요인</span>
-          </div>
-          <p class="text-[11px] text-slate-400">${item.desc}</p>
-        `;
-        causesContainer.appendChild(div);
-      });
+      if (causesContainer) {
+        causesContainer.innerHTML = '';
+        data.strengths.forEach(item => {
+          const div = document.createElement('div');
+          div.className = "p-3 bg-indigo-950/40 rounded-xl border border-indigo-900/60 space-y-1";
+          div.innerHTML = `
+            <div class="flex items-center justify-between text-xs font-bold text-slate-200">
+              <span>${item.title}</span>
+              <span class="text-indigo-400 font-extrabold">강점 요인</span>
+            </div>
+            <p class="text-[11px] text-slate-400">${item.desc}</p>
+          `;
+          causesContainer.appendChild(div);
+        });
+      }
 
       renderRadarChart(data.radarScores);
     }
