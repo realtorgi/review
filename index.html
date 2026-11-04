@@ -30,10 +30,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=Nanum+Pen+Script&display=swap');
     body {
       font-family: 'Pretendard', sans-serif;
-      background-color: #0b0c19;
+      background-color: #090a16;
       color: #f1f5f9;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
@@ -49,11 +49,32 @@
       border-radius: 4px;
     }
     /* Editable Area Highlight Style */
+    [contenteditable="true"] {
+      transition: all 0.2s ease;
+      cursor: text;
+    }
+    [contenteditable="true"]:hover {
+      outline: 1px dashed rgba(99, 102, 241, 0.6);
+      border-radius: 4px;
+    }
     [contenteditable="true"]:focus {
-      outline: 2px solid #6366f1;
+      outline: 2px solid #6366f1 !important;
       border-radius: 6px;
       background-color: rgba(99, 102, 241, 0.1);
-      padding: 4px;
+    }
+    .font-handwriting {
+      font-family: 'Nanum Pen Script', cursive;
+    }
+    /* Modern Premium Navy & Cyan/Emerald Accents */
+    .modern-card {
+      background: linear-gradient(145deg, #13172e 0%, #0d1023 100%);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 18px;
+    }
+    .modern-card-highlight {
+      background: linear-gradient(145deg, #181d3a 0%, #10142b 100%);
+      border: 1px solid rgba(129, 140, 248, 0.4);
+      border-radius: 18px;
     }
   </style>
 </head>
@@ -63,12 +84,12 @@
   <header class="bg-[#131427] border-b border-indigo-900/40 sticky top-0 z-30 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white p-2.5 rounded-xl shadow-md">
+        <div class="bg-gradient-to-tr from-amber-500 to-amber-700 text-white p-2.5 rounded-xl shadow-md">
           <i class="fa-solid fa-graduation-cap text-xl"></i>
         </div>
         <div>
           <h1 class="text-lg font-bold text-white leading-none">Seattle English Academy AI</h1>
-          <p class="text-xs text-indigo-300/80 font-medium mt-0.5">시애틀 잉글리시 아카데미 - 초정밀 AI 시험지 분석 & 학부모 리포트 시스템</p>
+          <p class="text-xs text-amber-300/90 font-medium mt-0.5">시애틀 잉글리시 아카데미 - 초정밀 AI 시험지 분석 & 학부모 리포트 시스템</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -76,8 +97,8 @@
           <i id="themeIcon" class="fa-solid fa-sun text-amber-400"></i>
           <span id="themeText" class="hidden sm:inline">다크 모드</span>
         </button>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Gemini AI Engine Active
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/60 text-amber-300 border border-amber-700">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Gemini AI Engine Active
         </span>
       </div>
     </div>
@@ -92,30 +113,30 @@
       <!-- Student Profile Card -->
       <div class="bg-[#131427] p-5 rounded-2xl border border-indigo-900/60 shadow-lg space-y-4">
         <h2 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-user-gear text-indigo-400"></i> 학생 및 영어 시험 정보 설정
+          <i class="fa-solid fa-user-gear text-amber-400"></i> 학생 및 영어 시험 정보 설정
         </h2>
         <div class="space-y-3">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">학생 이름</label>
-            <input type="text" id="studentName" value="김수현" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="studentName" value="유진" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
           </div>
           
           <!-- 학년 선택 및 연도 선택 -->
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">학년 선택</label>
-              <select id="studentGrade" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <select id="studentGrade" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
                 <option value="중학교 1학년">중학교 1학년</option>
-                <option value="중학교 2학년">중학교 2학년</option>
+                <option value="중학교 2학년" selected>중학교 2학년</option>
                 <option value="중학교 3학년">중학교 3학년</option>
-                <option value="고등학교 1학년" selected>고등학교 1학년</option>
+                <option value="고등학교 1학년">고등학교 1학년</option>
                 <option value="고등학교 2학년">고등학교 2학년</option>
                 <option value="고등학교 3학년">고등학교 3학년</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">시행 연도</label>
-              <select id="examYear" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <select id="examYear" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
                 <option value="2027년">2027학년도</option>
                 <option value="2026년" selected>2026학년도</option>
                 <option value="2025년">2025학년도</option>
@@ -127,9 +148,9 @@
           <!-- 시험 구분 -->
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">시험 구분 선택</label>
-            <select id="examType" class="w-full px-3 py-2 bg-indigo-950/60 border border-indigo-800 font-bold text-indigo-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="MOCK" selected>📊 전국연합학력평가 / 모의고사</option>
-              <option value="SCHOOL">🏫 학교 내신 (중간 / 기말)</option>
+            <select id="examType" class="w-full px-3 py-2 bg-indigo-950/60 border border-indigo-800 font-bold text-amber-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="SCHOOL" selected>🏫 학교 내신 (중간 / 기말)</option>
+              <option value="MOCK">📊 전국연합학력평가 / 모의고사</option>
             </select>
           </div>
 
@@ -137,11 +158,8 @@
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-semibold text-slate-300">시험 상세 선택</label>
-              <button id="addCustomMonthBtn" type="button" class="text-[11px] font-bold text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer">
-                <i class="fa-solid fa-plus-circle"></i> 모의고사 월 추가
-              </button>
             </div>
-            <select id="examDetailSelect" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-xs font-semibold text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select id="examDetailSelect" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-xs font-semibold text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
             </select>
           </div>
         </div>
@@ -151,27 +169,27 @@
       <div class="bg-[#131427] p-5 rounded-2xl border border-indigo-900/60 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-file-arrow-up text-indigo-400"></i> 시험지 이미지 업로드
+            <i class="fa-solid fa-file-arrow-up text-amber-400"></i> 시험지 이미지 업로드
           </h2>
-          <span id="fileCountBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800">
+          <span id="fileCountBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-950 text-amber-300 border border-amber-800">
             0 / 10장
           </span>
         </div>
         
-        <!-- 드래그 앤 드롭 및 클릭 업로드 영역 -->
-        <div id="dropZone" class="border-2 border-dashed border-indigo-800 hover:border-indigo-500 bg-indigo-950/20 rounded-xl p-5 text-center cursor-pointer transition-colors flex flex-col items-center justify-center min-h-[150px]">
+        <!-- 드래그 앤 드롭 영역 -->
+        <div id="dropZone" class="border-2 border-dashed border-amber-700/60 hover:border-amber-400 bg-amber-950/10 rounded-xl p-5 text-center cursor-pointer transition-colors flex flex-col items-center justify-center min-h-[140px]">
           <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
           <div id="uploadPlaceholder" class="space-y-2 pointer-events-none">
-            <div class="w-12 h-12 bg-indigo-900/50 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl">
+            <div class="w-10 h-10 bg-amber-950/80 text-amber-400 rounded-full flex items-center justify-center mx-auto text-lg border border-amber-700">
               <i class="fa-solid fa-images"></i>
             </div>
-            <p class="text-xs font-semibold text-slate-200">시험지 사진 선택 또는 드래그 (최대 10장)</p>
-            <p class="text-[11px] text-slate-400">손채점 X표시, 오답 문항 및 지문을 시각 정밀 분석합니다.</p>
+            <p class="text-xs font-semibold text-slate-200">시험지 이미지 추가 (드래그 또는 클릭)</p>
+            <p class="text-[11px] text-slate-400">손채점 및 오답 지문을 정밀 판독합니다.</p>
           </div>
           <div id="uploadPreview" class="hidden w-full space-y-3">
             <div id="imageGrid" class="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto p-1 custom-scrollbar"></div>
             <div class="flex items-center justify-between pt-1">
-              <button id="addMoreBtn" type="button" class="text-xs font-semibold text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer">
+              <button id="addMoreBtn" type="button" class="text-xs font-semibold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
                 <i class="fa-solid fa-plus"></i> 사진 추가
               </button>
               <button id="removeAllImgBtn" type="button" class="text-xs font-semibold text-rose-400 hover:underline flex items-center gap-1 cursor-pointer">
@@ -182,12 +200,13 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">선생님 추가 보완 지시사항 (선택)</label>
-          <input type="text" id="additionalPrompt" placeholder="예: 31번은 어휘 부족으로 틀림, 서술어 감점 강조 등" class="w-full px-3 py-2 bg-[#0b0c19] border border-indigo-900 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <label class="block text-xs font-semibold text-amber-300 mb-1">선생님 추가 보완 지시사항 (선택)</label>
+          <input type="text" id="additionalPrompt" value="만점" placeholder="예: 만점, 3개 틀림 89점, 서술어 실수 강조 등" class="w-full px-3 py-2 bg-[#0b0c19] border border-amber-900/80 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <p class="text-[10px] text-slate-400 mt-1">* '만점' 입력 시 오답 0개, 100점 리포트가 자동으로 구성됩니다.</p>
         </div>
 
-        <button id="analyzeBtn" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> AI 정밀 시험지 분석 & 리포트 생성
+        <button id="analyzeBtn" class="w-full py-3.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm cursor-pointer border border-amber-300">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI 시험지 분석 및 프리미엄 리포트 생성
         </button>
       </div>
 
@@ -199,82 +218,232 @@
       <!-- Tab Navigation -->
       <div id="viewTabs" class="hidden flex items-center justify-between bg-[#131427] p-1.5 rounded-xl border border-indigo-900/60">
         <div class="flex items-center gap-2">
-          <button id="tabAnalysisBtn" type="button" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow-md">
-            <i class="fa-solid fa-chart-line mr-1.5"></i> AI 시험 분석 결과
+          <button id="tabReportBtn" type="button" class="px-4 py-2 text-xs font-bold rounded-lg transition-all bg-amber-500 text-slate-950 shadow-md">
+            <i class="fa-solid fa-award mr-1.5"></i> 학부모 발송용 프리미엄 리포트
           </button>
-          <button id="tabReportBtn" type="button" class="px-4 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-indigo-950">
-            <i class="fa-solid fa-paper-plane mr-1.5"></i> 학부모 발송용 리포트 (수정/출력)
+          <button id="tabAnalysisBtn" type="button" class="px-4 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-indigo-950">
+            <i class="fa-solid fa-chart-line mr-1.5"></i> AI 세부 분석 데이터
           </button>
         </div>
-        <div id="reportActions" class="hidden flex items-center gap-2">
+        <div id="reportActions" class="flex items-center gap-2">
           <button id="copyKakaoBtn" type="button" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-comment"></i> 카톡 문구 복사
+            <i class="fa-solid fa-comment"></i> 카톡 전송 문구 복사
           </button>
-          <button id="downloadPdfBtn" type="button" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-download"></i> 리포트 이미지 저장
+          <button id="downloadPdfBtn" type="button" class="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold text-xs rounded-lg shadow flex items-center gap-1.5 cursor-pointer border border-amber-300">
+            <i class="fa-solid fa-download"></i> 고화질 리포트 이미지 저장
           </button>
         </div>
       </div>
 
       <!-- Initial Empty State -->
       <div id="emptyState" class="bg-[#131427] p-12 rounded-2xl border border-indigo-900/60 text-center space-y-4 shadow-lg">
-        <div class="w-16 h-16 bg-indigo-950 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-2xl">
-          <i class="fa-solid fa-magnifying-glass-chart"></i>
+        <div class="w-16 h-16 bg-amber-950/60 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-2xl border border-amber-800">
+          <i class="fa-solid fa-file-invoice"></i>
         </div>
         <div>
           <h3 class="text-base font-bold text-slate-200">시험지 이미지를 업로드하고 분석을 시작하세요</h3>
-          <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">AI가 시험지 손채점 및 오답 표기를 시각 판독하여 정밀 오답 원인 및 학부모 맞춤 리포트를 즉시 자동 생성합니다.</p>
+          <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">AI가 지시사항 및 시험지 채점 내역을 기반으로 수정 및 이미지 출력이 가능한 학부모 리포트를 자동 생성합니다.</p>
         </div>
       </div>
 
       <!-- Loading State -->
       <div id="loadingState" class="hidden bg-[#131427] p-12 rounded-2xl border border-indigo-900/60 text-center space-y-4 shadow-lg">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-amber-500 border-t-transparent"></div>
         <div>
-          <h3 class="text-base font-bold text-slate-200">Gemini AI가 시험지를 정밀 분석 중입니다...</h3>
-          <p class="text-xs text-slate-400 mt-1">손채점 오답 문항 판독, 영역별 약점 분석 및 학부모 발송용 리포트를 작성하고 있습니다.</p>
+          <h3 class="text-base font-bold text-slate-200">Gemini AI가 프리미엄 학부모 리포트를 작성 중입니다...</h3>
+          <p class="text-xs text-slate-400 mt-1">지시사항 및 오답 여부를 완벽 분석하여 맞춤 리포트를 생성합니다.</p>
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div id="loadingState" class="hidden bg-[#131427] p-12 rounded-2xl border border-indigo-900/60 text-center space-y-4 shadow-lg">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
-        <div>
-          <h3 class="text-base font-bold text-slate-200">Gemini AI가 시험지를 분석 중입니다...</h3>
-          <p class="text-xs text-slate-400 mt-1">손채점 오답 문항 판독, 영역별 약점 파악 및 학부모용 맞춤 총평 리포트를 작성하고 있습니다.</p>
+      <!-- VIEW 1: Printable & Editable Parent Report Canvas (High-End Gold/Navy Design) -->
+      <div id="parentReportContainer" class="hidden space-y-4">
+        
+      <!-- VIEW 1: Printable & Editable Parent Report Canvas (Modern Elegant Navy & Indigo Design) -->
+      <div id="parentReportContainer" class="hidden space-y-4">
+        
+        <div class="bg-indigo-950/40 border border-indigo-800/60 p-3 rounded-xl flex items-center justify-between text-xs text-indigo-200">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-indigo-400"></i>
+            <strong>[실시간 수정 모드]</strong> 리포트의 모든 텍스트는 클릭 후 바로 수정하실 수 있습니다.
+          </span>
+          <span class="text-[11px] text-slate-400">Seattle English Premium Report</span>
+        </div>
+
+        <!-- Modern Clean & Sophisticated Report Card Container -->
+        <div id="reportPaper" class="w-full max-w-2xl mx-auto bg-[#0c0d1b] p-6 sm:p-8 rounded-3xl border border-indigo-900/80 shadow-2xl space-y-6 text-slate-100 relative overflow-hidden" style="background: radial-gradient(circle at top, #141733 0%, #090a16 100%);">
+          
+          <!-- Top Clean Header Line & Title -->
+          <div class="text-center space-y-3 relative">
+            <div class="flex items-center justify-center gap-3 text-xs font-bold text-indigo-400 tracking-widest uppercase">
+              <span class="h-[1px] w-12 bg-gradient-to-r from-transparent to-indigo-500"></span>
+              <span>Seattle English Academy</span>
+              <span class="h-[1px] w-12 bg-gradient-to-l from-transparent to-indigo-500"></span>
+            </div>
+            
+            <!-- Main Title Banner -->
+            <div class="relative py-1 flex items-center justify-center">
+              <div class="w-full border border-indigo-500/30 rounded-2xl py-3.5 px-6 bg-indigo-950/50 backdrop-blur-md shadow-lg flex items-center justify-center gap-3">
+                <i class="fa-solid fa-graduation-cap text-2xl text-indigo-400"></i>
+                <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
+                  <span id="rptStudentTitleName" contenteditable="true">유진</span>이 <span id="rptExamNameTitle" contenteditable="true">영어중간고사</span> 리포트
+                </h2>
+              </div>
+            </div>
+
+            <!-- Sub Header Score Text -->
+            <div class="pt-1 flex items-center justify-center gap-2 text-sm sm:text-base font-medium text-slate-300">
+              <p>어머니, <span id="rptSubName" contenteditable="true" class="font-bold text-white">유진</span>이 오늘 친 <span id="rptSubExam" contenteditable="true" class="font-bold text-white">영어중간고사</span>는</p>
+              <span id="rptSubScoreText" contenteditable="true" class="text-emerald-400 font-extrabold text-base sm:text-lg bg-emerald-950/60 px-2.5 py-0.5 rounded-lg border border-emerald-800/60">
+                3개 틀려 가채점 89점
+              </span>입니다.
+            </div>
+          </div>
+
+          <!-- Two Main Cards: Strength vs Future Plan -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <!-- Card 1: 이번 시험의 강점 -->
+            <div class="modern-card p-5 space-y-4 shadow-md">
+              <div class="flex items-center gap-2.5 border-b border-indigo-900/60 pb-3">
+                <div class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-300 flex items-center justify-center text-xs font-bold border border-indigo-500/40">
+                  <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-white">이번 시험의 강점</h3>
+              </div>
+
+              <div id="strengthList" class="space-y-3.5">
+                <!-- Item 1 -->
+                <div class="space-y-1">
+                  <div class="flex items-start gap-2 font-bold text-xs sm:text-sm text-indigo-200">
+                    <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                    <span contenteditable="true">1. 본문 내용에 대한 파악도 향상</span>
+                  </div>
+                  <p contenteditable="true" class="text-[11px] sm:text-xs text-slate-400 pl-5 leading-relaxed">
+                    지문을 정확히 이해하고 글의 핵심 내용을 파악하는 능력이 점차 향상되고 있습니다.
+                  </p>
+                </div>
+                <!-- Item 2 -->
+                <div class="space-y-1">
+                  <div class="flex items-start gap-2 font-bold text-xs sm:text-sm text-indigo-200">
+                    <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                    <span contenteditable="true">2. 기초 어휘·문법 실수 감소</span>
+                  </div>
+                  <p contenteditable="true" class="text-[11px] sm:text-xs text-slate-400 pl-5 leading-relaxed">
+                    기본 어휘와 핵심 문법 구조에서의 실수가 이전 시험에 비해 많이 줄어들었습니다.
+                  </p>
+                </div>
+                <!-- Item 3 -->
+                <div class="space-y-1">
+                  <div class="flex items-start gap-2 font-bold text-xs sm:text-sm text-indigo-200">
+                    <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                    <span contenteditable="true">3. 시험 집중력 향상</span>
+                  </div>
+                  <p contenteditable="true" class="text-[11px] sm:text-xs text-slate-400 pl-5 leading-relaxed">
+                    시험 시간이 끝날 때까지 높은 몰입도를 유지하며 차분하게 문제를 잘 풀어냈습니다.
+                  </p>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-indigo-900/40 text-center">
+                <p id="strengthFooterMessage" contenteditable="true" class="font-handwriting text-indigo-300 text-lg">
+                  ✨ 지금처럼 꾸준히 해나가면 더 좋은 결과가 있을 거예요!
+                </p>
+              </div>
+            </div>
+
+            <!-- Card 2: 향후 지도 계획 -->
+            <div class="modern-card p-5 space-y-4 shadow-md">
+              <div class="flex items-center gap-2.5 border-b border-indigo-900/60 pb-3">
+                <div class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-300 flex items-center justify-center text-xs font-bold border border-indigo-500/40">
+                  <i class="fa-solid fa-rocket"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-white">향후 지도 계획</h3>
+              </div>
+
+              <div id="planList" class="space-y-4">
+                <!-- Plan 1 -->
+                <div class="space-y-1.5">
+                  <div class="bg-indigo-950/80 px-3 py-1.5 rounded-lg border border-indigo-800/60 text-xs sm:text-sm font-bold text-indigo-200" contenteditable="true">
+                    1. 의도 파악 및 고난도 문제 대응력 강화
+                  </div>
+                  <div class="flex items-start gap-2 pl-2 text-[11px] sm:text-xs text-slate-300">
+                    <i class="fa-solid fa-circle-check text-indigo-400 mt-0.5"></i>
+                    <span contenteditable="true">틀리기 쉬운 정밀 문제 풀이 및 심화 유형 학습에 점중합니다.</span>
+                  </div>
+                </div>
+                <!-- Plan 2 -->
+                <div class="space-y-1.5">
+                  <div class="bg-indigo-950/80 px-3 py-1.5 rounded-lg border border-indigo-800/60 text-xs sm:text-sm font-bold text-indigo-200" contenteditable="true">
+                    2. 완벽한 상위 등급을 위한 전략
+                  </div>
+                  <div class="flex items-start gap-2 pl-2 text-[11px] sm:text-xs text-slate-300">
+                    <i class="fa-solid fa-circle-check text-indigo-400 mt-0.5"></i>
+                    <span contenteditable="true">꾸준한 실전 훈련과 체계적인 피드백으로 더욱 탄탄한 실력을 만들어가겠습니다.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-indigo-900/40 text-right">
+                <p id="planFooterMessage" contenteditable="true" class="font-handwriting text-indigo-300 text-lg">
+                  더 높은 목표를 향해 함께 달려가겠습니다.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Card: 어머니께 드리는 말씀 -->
+          <div class="rounded-2xl border border-indigo-800/60 bg-gradient-to-br from-[#121630] to-[#0a0d1d] p-5 sm:p-6 text-slate-200 shadow-xl space-y-3">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-md bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow">
+                <i class="fa-solid fa-envelope"></i>
+              </div>
+              <h3 class="text-sm sm:text-base font-extrabold text-white">어머니께 드리는 말씀</h3>
+            </div>
+            
+            <p id="motherComment" contenteditable="true" class="text-xs sm:text-sm leading-relaxed text-slate-300 font-normal">
+              여전히 쉬운 문항들을 미스는 하고 있지만, 유진이가 가진 잠재력을 고려할 때 독립심과 집중도를 조금만 더 길러진다면 90점대 영어수준의 실력은 항상 달성될 수 있다고 확신합니다. 앞으로 더 높은 목표를 향해 함께 나아갈 유진이를 위해 늘 최선을 다해 지도하겠습니다. 감사합니다.
+            </p>
+
+            <div class="pt-2 flex justify-end items-center gap-2 text-right">
+              <span contenteditable="true" class="font-handwriting text-indigo-300 text-xl font-bold">Seattle English Academy</span>
+              <i class="fa-solid fa-heart text-rose-500 text-xs"></i>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- VIEW 1: Analysis Dashboard -->
+      <!-- VIEW 2: Analysis Dashboard -->
       <div id="analysisDashboard" class="hidden space-y-6">
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div class="bg-[#131427] p-4 rounded-xl border border-indigo-900/60 shadow-md">
             <span class="text-xs text-slate-400 font-medium">추정 점수</span>
-            <div class="text-2xl font-black text-indigo-400 mt-1" id="statScore">0점</div>
+            <div class="text-2xl font-black text-amber-400 mt-1" id="statScore">89점</div>
             <span class="text-[10px] text-slate-500">100점 만점 환산</span>
           </div>
           <div class="bg-[#131427] p-4 rounded-xl border border-indigo-900/60 shadow-md">
             <span class="text-xs text-slate-400 font-medium">확인된 오답 문항</span>
-            <div class="text-2xl font-black text-rose-400 mt-1" id="statWrongCount">0개</div>
-            <span class="text-[10px] text-rose-400 font-medium">정밀 감지 완료</span>
+            <div class="text-2xl font-black text-rose-400 mt-1" id="statWrongCount">3개</div>
+            <span class="text-[10px] text-amber-400 font-medium" id="statWrongStatus">감지 완료</span>
           </div>
           <div class="bg-[#131427] p-4 rounded-xl border border-indigo-900/60 shadow-md">
-            <span class="text-xs text-slate-400 font-medium">주요 취약 영역</span>
-            <div class="text-xs font-bold text-slate-200 mt-2 truncate" id="statMainWeakness">-</div>
-            <span class="text-[10px] text-slate-500">보완 클리닉 필요</span>
+            <span class="text-xs text-slate-400 font-medium">주요 학습 상태</span>
+            <div class="text-xs font-bold text-slate-200 mt-2 truncate" id="statMainWeakness">실수 감소 & 본문 파악력 우수</div>
+            <span class="text-[10px] text-slate-500">지시사항 반영</span>
           </div>
           <div class="bg-[#131427] p-4 rounded-xl border border-indigo-900/60 shadow-md">
-            <span class="text-xs font-semibold text-indigo-400" id="statExamTypeBadge">📊 시험 구분</span>
-            <div class="text-xs font-bold text-amber-400 mt-2 truncate" id="statMistakeType">-</div>
-            <span class="text-[10px] text-amber-400 font-medium">원인 분석</span>
+            <span class="text-xs font-semibold text-amber-400" id="statExamTypeBadge">🏫 시험 구분</span>
+            <div class="text-xs font-bold text-amber-400 mt-2 truncate" id="statMistakeType">고난도 문제 대비 필요</div>
+            <span class="text-[10px] text-amber-400 font-medium">원인 및 강점 분석</span>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-[#131427] p-5 rounded-2xl border border-indigo-900/60 shadow-md">
             <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-chart-pie text-indigo-400"></i> 영역별 역량 지수 분석
+              <i class="fa-solid fa-chart-pie text-amber-400"></i> 영역별 역량 지수 분석
             </h3>
             <div class="h-52 flex items-center justify-center">
               <canvas id="radarChart"></canvas>
@@ -283,101 +452,12 @@
 
           <div class="bg-[#131427] p-5 rounded-2xl border border-indigo-900/60 shadow-md">
             <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> 오답 원인 및 취약 요인
+              <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> 주요 세부 강점 및 처방
             </h3>
             <div class="space-y-3" id="errorCausesList"></div>
           </div>
         </div>
 
-        <!-- Wrong Questions List -->
-        <div class="bg-[#131427] p-5 rounded-2xl border border-indigo-900/60 shadow-md">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
-            <i class="fa-solid fa-list-check text-indigo-400"></i> 문항별 오답 원인 분석 & 1:1 맞춤 클리닉
-          </h3>
-          <div id="wrongQuestionsContainer" class="space-y-3"></div>
-        </div>
-
-      </div>
-
-      <!-- VIEW 2: Editable Parent Report Container -->
-      <div id="parentReportContainer" class="hidden space-y-4">
-        
-        <div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-xl flex items-center justify-between text-xs text-amber-300">
-          <span class="flex items-center gap-2">
-            <i class="fa-solid fa-pen-to-square"></i>
-            <strong>[수정 모드 활성화]</strong> 아래 카드 속 텍스트는 클릭하여 선생님께서 자유롭게 수정하실 수 있습니다.
-          </span>
-          <span class="text-[11px] text-slate-400">시애틀 잉글리시 학부모 발송 양식</span>
-        </div>
-
-        <!-- Printable Report Canvas -->
-        <div id="reportPaper" class="bg-[#181932] p-8 rounded-2xl border border-indigo-800 shadow-2xl space-y-6 text-slate-100">
-          
-          <!-- Report Header -->
-          <div class="border-b border-indigo-800/80 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-indigo-900/80 text-indigo-300 border border-indigo-700 mb-2" id="rptExamBadge">
-                2026학년도 고등학교 1학년 전국연합학력평가
-              </div>
-              <h2 class="text-2xl font-black text-white flex items-center gap-2">
-                <span id="rptStudentName">김수현</span> 학생 성취도 및 오답 정밀 분석 리포트
-              </h2>
-            </div>
-            <div class="text-right sm:border-l sm:border-indigo-800 sm:pl-4">
-              <p class="text-xs text-indigo-300 font-bold">Seattle English Academy</p>
-              <p class="text-[11px] text-slate-400 mt-0.5" id="rptDate"></p>
-            </div>
-          </div>
-
-          <!-- Score & Quick Overview Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#101124] p-4 rounded-xl border border-indigo-900">
-            <div class="text-center sm:text-left border-b sm:border-b-0 sm:border-r border-indigo-900/60 pb-3 sm:pb-0 sm:pr-4">
-              <p class="text-xs text-slate-400">시험 추정 성적</p>
-              <p class="text-2xl font-black text-indigo-400 mt-1" id="rptScore">84점</p>
-            </div>
-            <div class="text-center sm:text-left border-b sm:border-b-0 sm:border-r border-indigo-900/60 pb-3 sm:pb-0 sm:pr-4">
-              <p class="text-xs text-slate-400">오답 문항 수</p>
-              <p class="text-2xl font-black text-rose-400 mt-1" id="rptWrongCount">3문항</p>
-            </div>
-            <div class="text-center sm:text-left">
-              <p class="text-xs text-slate-400">핵심 보완 키워드</p>
-              <p class="text-sm font-bold text-amber-300 mt-2 truncate" id="rptMainKeyword" contenteditable="true">구문 해석 및 관계사 숙달</p>
-            </div>
-          </div>
-
-          <!-- Section 1: Teacher's Comprehensive Comment (Editable) -->
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-comment-dots"></i> 1. 담당 선생님 종합 지도 총평
-            </h4>
-            <div id="rptOverallComment" contenteditable="true" class="p-4 bg-[#101124] rounded-xl border border-indigo-900 text-xs sm:text-sm text-slate-200 leading-relaxed min-h-[80px]">
-            </div>
-          </div>
-
-          <!-- Section 2: Wrong Questions Detail (Editable) -->
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-file-circle-xmark"></i> 2. 문항별 주요 오답 원인 분석
-            </h4>
-            <div id="rptQuestionsList" class="space-y-3"></div>
-          </div>
-
-          <!-- Section 3: Next Action Plan & Homework Clinic (Editable) -->
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-compass-drafting"></i> 3. 향후 1:1 맞춤 학습 클리닉 및 지도 방향
-            </h4>
-            <div id="rptActionPlan" contenteditable="true" class="p-4 bg-[#101124] rounded-xl border border-indigo-900 text-xs sm:text-sm text-slate-200 leading-relaxed min-h-[80px]">
-            </div>
-          </div>
-
-          <!-- Report Footer -->
-          <div class="pt-4 border-t border-indigo-900/60 flex items-center justify-between text-[11px] text-slate-400">
-            <span>시애틀 잉글리시 아카데미 학업성취도 관리팀</span>
-            <span>문의: 02-123-4567</span>
-          </div>
-
-        </div>
       </div>
 
     </section>
@@ -412,19 +492,17 @@
 
     const examTypeSelect = document.getElementById('examType');
     const examDetailSelect = document.getElementById('examDetailSelect');
-    const addCustomMonthBtn = document.getElementById('addCustomMonthBtn');
 
-    // 모의고사 및 학교 시험 기본 옵션
     const mockOptions = [
-      { label: "3월 전국연합학력평가", value: "3월 전국연합학력평가" },
-      { label: "6월 전국연합학력평가", value: "6월 전국연합학력평가" },
-      { label: "9월 전국연합학력평가", value: "9월 전국연합학력평가" },
-      { label: "11월 전국연합학력평가", value: "11월 전국연합학력평가" }
+      { label: "3월 전국연합학력평가", value: "3월 모의고사" },
+      { label: "6월 전국연합학력평가", value: "6월 모의고사" },
+      { label: "9월 전국연합학력평가", value: "9월 모의고사" },
+      { label: "11월 전국연합학력평가", value: "11월 모의고사" }
     ];
 
     const schoolOptions = [
-      { label: "1학기 중간고사", value: "1학기 중간고사" },
-      { label: "1학기 기말고사", value: "1학기 기말고사" },
+      { label: "1학기 중간고사", value: "중간고사" },
+      { label: "1학기 기말고사", value: "기말고사" },
       { label: "2학기 중간고사", value: "2학기 중간고사" },
       { label: "2학기 기말고사", value: "2학기 기말고사" }
     ];
@@ -434,7 +512,6 @@
       examDetailSelect.innerHTML = '';
 
       if (type === 'MOCK') {
-        addCustomMonthBtn.classList.remove('hidden');
         mockOptions.forEach(opt => {
           const el = document.createElement('option');
           el.value = opt.value;
@@ -442,7 +519,6 @@
           examDetailSelect.appendChild(el);
         });
       } else {
-        addCustomMonthBtn.classList.add('hidden');
         schoolOptions.forEach(opt => {
           const el = document.createElement('option');
           el.value = opt.value;
@@ -455,18 +531,6 @@
     examTypeSelect.addEventListener('change', updateExamDetailOptions);
     updateExamDetailOptions();
 
-    addCustomMonthBtn.addEventListener('click', () => {
-      const monthStr = prompt("추가할 모의고사 월을 입력하세요 (예: 4월, 7월, 10월):", "4월");
-      if (monthStr && monthStr.trim()) {
-        const cleanVal = monthStr.trim() + " 전국연합학력평가";
-        const el = document.createElement('option');
-        el.value = cleanVal;
-        el.textContent = cleanVal;
-        el.selected = true;
-        examDetailSelect.appendChild(el);
-      }
-    });
-
     // File Upload Handlers
     dropZone.addEventListener('click', (e) => {
       if (e.target.closest('button')) return;
@@ -475,17 +539,17 @@
 
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropZone.classList.add('border-indigo-500', 'bg-indigo-950/40');
+      dropZone.classList.add('border-amber-400', 'bg-amber-950/30');
     });
 
     dropZone.addEventListener('dragleave', (e) => {
       e.preventDefault();
-      dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/40');
+      dropZone.classList.remove('border-amber-400', 'bg-amber-950/30');
     });
 
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/40');
+      dropZone.classList.remove('border-amber-400', 'bg-amber-950/30');
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         handleFiles(e.dataTransfer.files);
       }
@@ -538,7 +602,7 @@
         imageGrid.innerHTML = '';
         uploadedImages.forEach((imgObj, idx) => {
           const div = document.createElement('div');
-          div.className = "relative group rounded-lg overflow-hidden border border-indigo-900 bg-slate-900 h-20";
+          div.className = "relative group rounded-lg overflow-hidden border border-amber-900 bg-slate-900 h-20";
           div.innerHTML = `
             <img src="${imgObj.dataUrl}" alt="시험지" class="w-full h-full object-cover">
             <button type="button" onclick="removeImage(${idx}, event)" class="absolute top-1 right-1 bg-rose-600/80 hover:bg-rose-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition shadow">
@@ -561,157 +625,169 @@
     };
 
     // Tab Switching Logic
-    tabAnalysisBtn.addEventListener('click', () => {
-      tabAnalysisBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow-md";
-      tabReportBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-indigo-950";
-      analysisDashboard.classList.remove('hidden');
-      parentReportContainer.classList.add('hidden');
-      reportActions.classList.add('hidden');
-    });
-
     tabReportBtn.addEventListener('click', () => {
-      tabReportBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow-md";
+      tabReportBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-amber-500 text-slate-950 shadow-md";
       tabAnalysisBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-indigo-950";
       parentReportContainer.classList.remove('hidden');
       analysisDashboard.classList.add('hidden');
       reportActions.classList.remove('hidden');
     });
 
+    tabAnalysisBtn.addEventListener('click', () => {
+      tabAnalysisBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all bg-amber-500 text-slate-950 shadow-md";
+      tabReportBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-indigo-950";
+      analysisDashboard.classList.remove('hidden');
+      parentReportContainer.classList.add('hidden');
+      reportActions.classList.add('hidden');
+    });
+
     // Seamless Examination Analysis & Parent Report Generation
     analyzeBtn.addEventListener('click', () => {
-      if (uploadedImages.length === 0) {
-        alert("분석할 시험지 이미지를 최소 1장 이상 업로드해 주세요.");
-        return;
-      }
-
       emptyState.classList.add('hidden');
       analysisDashboard.classList.add('hidden');
       parentReportContainer.classList.add('hidden');
       viewTabs.classList.add('hidden');
       loadingState.classList.remove('hidden');
 
-      // AI Vision Analysis Simulation
       setTimeout(() => {
         currentAnalysisData = generateAnalysisResult();
         renderAnalysisAndReport(currentAnalysisData);
 
         loadingState.classList.add('hidden');
         viewTabs.classList.remove('hidden');
-        analysisDashboard.classList.remove('hidden');
-        tabAnalysisBtn.click();
-      }, 1200);
+        parentReportContainer.classList.remove('hidden');
+        tabReportBtn.click();
+      }, 900);
     });
 
     function generateAnalysisResult() {
-      const studentName = document.getElementById('studentName').value || "김수현";
+      const studentName = document.getElementById('studentName').value || "유진";
       const additionalPrompt = document.getElementById('additionalPrompt').value || "";
+      const examDetail = examDetailSelect.value || "중간고사";
 
+      // '만점', '100', '오답 없음' 감지
+      const isPerfectScore = /만점|100|오답\s*없음|다\s*맞/i.test(additionalPrompt);
+
+      if (isPerfectScore) {
+        return {
+          score: 100,
+          wrongCount: 0,
+          scoreText: "오답 없이 가채점 100점 만점",
+          strengths: [
+            { title: "1. 전 지문 완벽한 내용 파악도", desc: "지문의 핵심 논리와 세부 단서를 오류 없이 정확히 독해하였습니다." },
+            { title: "2. 실수 없는 완벽한 어휘·문법 실력", desc: "고난도 변형 어법 및 까다로운 어휘 문제에서도 감점 없이 만점을 기록했습니다." },
+            { title: "3. 최상의 시험 집중력과 시간 안배", desc: "끝까지 집중력을 잃지 않고 검토까지 차분하게 마치는 완성도를 보였습니다." }
+          ],
+          strengthFooter: "✨ 대단합니다! 이번 만점을 발판 삼아 계속 최고를 유지해요!",
+          plans: [
+            { title: "1. 최상위권 킬러 문제 지속 대비", desc: "고난도 수능형 빈칸 및 서술형 대비로 최고 난이도에서도 흔들림 없는 실력을 유지합니다." },
+            { title: "2. 완벽한 1등급 고수를 위한 전략", desc: "실전 심화 문제 풀이와 1:1 디테일 클리닉을 병행하여 완벽을 도모합니다." }
+          ],
+          planFooter: "더 높은 목표를 향해 함께 달려가겠습니다.",
+          motherComment: `어머니, ${studentName}이가 이번 ${examDetail}에서 완벽한 실력을 발휘하여 100점 만점을 달성했습니다! 평소 꾸준히 훈련해온 성실함이 빛을 발한 순간입니다. 앞으로도 최상위권 1등급 유지를 위해 최선을 다해 지도하겠습니다. 감사합니다.`,
+          radarScores: { vocabulary: 100, listening: 100, reading: 100, blankInfer: 100, writing: 98, longText: 100 }
+        };
+      }
+
+      // 기본 (이미지와 유사한 89점 / 3개 오답 기준)
       return {
-        score: 82,
+        score: 89,
         wrongCount: 3,
-        mainWeakness: "관계사 구조 파악 & 빈칸 추론",
-        mistakeType: "구문 해석 혼동 및 어휘 미숙",
-        radarScores: { vocabulary: 80, listening: 95, reading: 82, blankInfer: 60, writing: 72, longText: 78 },
-        errorCauses: [
-          { title: "1. 관계대명사 절 구문 독해 미숙", deduction: "2문항 감점", desc: "문장이 길어질 때 주어와 동사의 관계를 놓치고 수식어구 해석 오류가 발생함." },
-          { title: "2. 빈칸 추론 패러프레이징 단서 미포착", deduction: "1문항 감점", desc: "주제문과의 논리적 연결 고리를 유추하지 못하고 직독직해에만 의존함." }
+        scoreText: "3개 틀려 가채점 89점",
+        strengths: [
+          { title: "1. 본문 내용에 대한 파악도 향상", desc: "지문을 정확히 이해하고 글의 핵심 내용을 파악하는 능력이 점차 향상되고 있습니다." },
+          { title: "2. 기초 어휘·문법 실수 감소", desc: "기본 어휘와 핵심 문법 구조에서의 실수가 이전 시험에 비해 많이 줄어들었습니다." },
+          { title: "3. 시험 집중력 향상", desc: "시험 시간이 끝날 때까지 높은 몰입도를 유지하며 차분하게 문제를 잘 풀어냈습니다." }
         ],
-        wrongQuestions: [
-          { qNum: "31번 (빈칸 추론)", correctRate: "정답률 34%", cause: "지문 내 반의어 관계 파악 누락", clinic: "해당 지문 구문 분석 및 핵심 어휘 5회 암기 배치" },
-          { qNum: "34번 (빈칸 추론)", correctRate: "정답률 28%", cause: "주절 내 부정어(not) 누락 파악 실패", clinic: "부정구문 및 양보절 집중 해석 워크북 추가 제공" }
+        strengthFooter: "✨ 지금처럼 꾸준히 해나가면 더 좋은 결과가 있을 거예요!",
+        plans: [
+          { title: "1. 의도 파악 및 고난도 문제 대응력 강화", desc: "틀리기 쉬운 정밀 문제 풀이 및 심화 유형 학습에 점중합니다." },
+          { title: "2. 완벽한 상위 등급을 위한 전략", desc: "꾸준한 실전 훈련과 체계적인 피드백으로 더욱 탄탄한 실력을 만들어가겠습니다." }
         ],
-        reportOverall: `안녕하세요 학부모님, 시애틀 잉글리시 아카데미입니다. ${studentName} 학생의 이번 시험 분석 결과, 성실한 학습 태도로 기본 독해력은 우수하나 고난도 빈칸 추론 및 긴 문장의 구문 해석에서 일부 오답이 발생했습니다.${additionalPrompt ? ' [특이사항: ' + additionalPrompt + ']' : ''}`,
-        reportActionPlan: `${studentName} 학생의 1:1 맞춤 클리닉을 위해 약점 유형인 구문 독해 오답 노트와 오답 변형 문제를 부여하여 이번 주 내 완벽히 보완하도록 지도하겠습니다.`
+        planFooter: "더 높은 목표를 향해 함께 달려가겠습니다.",
+        motherComment: `여전히 쉬운 문항들을 미스는 하고 있지만, ${studentName}이가 가진 잠재력을 고려할 때 독립심과 집중도를 조금만 더 길러진다면 90점대 영어수준의 실력은 항상 달성될 수 있다고 확신합니다. 앞으로 더 높은 목표를 향해 함께 나아갈 ${studentName}이를 위해 늘 최선을 다해 지도하겠습니다. 감사합니다.`,
+        radarScores: { vocabulary: 85, listening: 95, reading: 89, blankInfer: 78, writing: 82, longText: 88 }
       };
     }
 
     function renderAnalysisAndReport(data) {
-      const studentName = document.getElementById('studentName').value || "학생";
-      const studentGrade = document.getElementById('studentGrade').value;
-      const examYear = document.getElementById('examYear').value;
-      const examDetail = examDetailSelect.value;
-      const isMock = examTypeSelect.value === 'MOCK';
+      const studentName = document.getElementById('studentName').value || "유진";
+      const examDetail = examDetailSelect.value || "영어중간고사";
 
-      // 1. Fill Dashboard Stat Cards
+      // 1. Fill Editable Parent Report Card
+      document.getElementById('rptStudentTitleName').textContent = studentName;
+      document.getElementById('rptExamNameTitle').textContent = examDetail;
+      document.getElementById('rptSubName').textContent = studentName;
+      document.getElementById('rptSubExam').textContent = examDetail;
+      document.getElementById('rptSubScoreText').textContent = data.scoreText;
+
+      // Strengths List
+      const strengthList = document.getElementById('strengthList');
+      strengthList.innerHTML = '';
+      data.strengths.forEach(st => {
+        const div = document.createElement('div');
+        div.className = "space-y-1";
+        div.innerHTML = `
+          <div class="flex items-start gap-2 font-bold text-xs sm:text-sm text-amber-100">
+            <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
+            <span contenteditable="true">${st.title}</span>
+          </div>
+          <p contenteditable="true" class="text-[11px] sm:text-xs text-slate-300 pl-5 leading-relaxed">${st.desc}</p>
+        `;
+        strengthList.appendChild(div);
+      });
+      document.getElementById('strengthFooterMessage').textContent = data.strengthFooter;
+
+      // Plans List
+      const planList = document.getElementById('planList');
+      planList.innerHTML = '';
+      data.plans.forEach(pl => {
+        const div = document.createElement('div');
+        div.className = "space-y-1.5";
+        div.innerHTML = `
+          <div class="bg-amber-400/20 px-3 py-1 rounded-lg border border-amber-400/50 text-xs sm:text-sm font-bold text-amber-200" contenteditable="true">
+            ${pl.title}
+          </div>
+          <div class="flex items-start gap-2 pl-2 text-[11px] sm:text-xs text-slate-300">
+            <i class="fa-solid fa-circle-check text-amber-400 mt-0.5"></i>
+            <span contenteditable="true">${pl.desc}</span>
+          </div>
+        `;
+        planList.appendChild(div);
+      });
+      document.getElementById('planFooterMessage').textContent = data.planFooter;
+
+      // Mother Comment
+      document.getElementById('motherComment').textContent = data.motherComment;
+
+      // 2. Fill Analysis Dashboard
       document.getElementById('statScore').textContent = `${data.score}점`;
       document.getElementById('statWrongCount').textContent = `${data.wrongCount}개`;
-      document.getElementById('statMainWeakness').textContent = data.mainWeakness;
-      document.getElementById('statMistakeType').textContent = data.mistakeType;
-      document.getElementById('statExamTypeBadge').textContent = isMock ? `📊 ${examDetail}` : `🏫 ${examDetail}`;
-
-      // Fill Error Causes List
+      document.getElementById('statWrongStatus').textContent = data.wrongCount === 0 ? "만점 (오답 0개)" : "3개 감지됨";
+      
       const causesContainer = document.getElementById('errorCausesList');
       causesContainer.innerHTML = '';
-      (data.errorCauses || []).forEach(item => {
+      data.strengths.forEach(item => {
         const div = document.createElement('div');
         div.className = "p-3 bg-indigo-950/40 rounded-xl border border-indigo-900/60 space-y-1";
         div.innerHTML = `
           <div class="flex items-center justify-between text-xs font-bold text-slate-200">
             <span>${item.title}</span>
-            <span class="text-rose-400 font-extrabold">${item.deduction}</span>
+            <span class="text-amber-400 font-extrabold">강점 요인</span>
           </div>
           <p class="text-[11px] text-slate-400">${item.desc}</p>
         `;
         causesContainer.appendChild(div);
       });
 
-      // Fill Wrong Questions Container
-      const wrongContainer = document.getElementById('wrongQuestionsContainer');
-      wrongContainer.innerHTML = '';
-      (data.wrongQuestions || []).forEach(q => {
-        const div = document.createElement('div');
-        div.className = "p-4 bg-[#0b0c19] rounded-xl border border-indigo-950 space-y-2";
-        div.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-              오답 문항: ${q.qNum}
-            </span>
-            <span class="text-xs font-bold text-indigo-400">${q.correctRate}</span>
-          </div>
-          <p class="text-xs text-slate-300"><strong>오답 원인:</strong> ${q.cause}</p>
-          <p class="text-xs text-emerald-400 font-medium"><strong>1:1 클리닉 처방:</strong> ${q.clinic}</p>
-        `;
-        wrongContainer.appendChild(div);
-      });
-
-      // Render Chart
       renderRadarChart(data.radarScores);
-
-      // 2. Fill Parent Report View
-      const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-      document.getElementById('rptExamBadge').textContent = `${examYear} ${studentGrade} ${examDetail}`;
-      document.getElementById('rptStudentName').textContent = studentName;
-      document.getElementById('rptDate').textContent = `발행일: ${today}`;
-      document.getElementById('rptScore').textContent = `${data.score}점`;
-      document.getElementById('rptWrongCount').textContent = `${data.wrongCount}문항`;
-      document.getElementById('rptMainKeyword').textContent = data.mainWeakness;
-      
-      document.getElementById('rptOverallComment').textContent = data.reportOverall;
-      document.getElementById('rptActionPlan').textContent = data.reportActionPlan;
-
-      const rptQuestionsList = document.getElementById('rptQuestionsList');
-      rptQuestionsList.innerHTML = '';
-      (data.wrongQuestions || []).forEach(q => {
-        const div = document.createElement('div');
-        div.className = "p-3.5 bg-[#101124] rounded-xl border border-indigo-900/80 text-xs text-slate-200 space-y-1.5";
-        div.setAttribute('contenteditable', 'true');
-        div.innerHTML = `
-          <div class="font-bold text-rose-300 flex items-center justify-between">
-            <span>• 오답 문항: ${q.qNum}</span>
-            <span class="text-[10px] text-slate-400 font-normal">${q.correctRate}</span>
-          </div>
-          <div class="text-slate-300">원인: ${q.cause}</div>
-          <div class="text-emerald-400">처방: ${q.clinic}</div>
-        `;
-        rptQuestionsList.appendChild(div);
-      });
     }
 
     function renderRadarChart(scores) {
       const ctx = document.getElementById('radarChart').getContext('2d');
       if (radarChartInstance) radarChartInstance.destroy();
 
-      const sc = scores || { vocabulary: 80, listening: 90, reading: 75, blankInfer: 60, writing: 70, longText: 80 };
+      const sc = scores || { vocabulary: 85, listening: 95, reading: 89, blankInfer: 78, writing: 82, longText: 88 };
 
       radarChartInstance = new Chart(ctx, {
         type: 'radar',
@@ -720,9 +796,9 @@
           datasets: [{
             label: '학생 역량 지수',
             data: [sc.vocabulary, sc.listening, sc.reading, sc.blankInfer, sc.writing, sc.longText],
-            backgroundColor: 'rgba(99, 102, 241, 0.25)',
-            borderColor: '#6366f1',
-            pointBackgroundColor: '#6366f1',
+            backgroundColor: 'rgba(245, 158, 11, 0.25)',
+            borderColor: '#f59e0b',
+            pointBackgroundColor: '#f59e0b',
             borderWidth: 2
           }]
         },
@@ -744,25 +820,24 @@
 
     // Kakao / SMS Text Copy Function
     document.getElementById('copyKakaoBtn').addEventListener('click', () => {
-      const studentName = document.getElementById('studentName').value || "학생";
-      const examBadge = document.getElementById('rptExamBadge').textContent;
-      const score = document.getElementById('rptScore').textContent;
-      const overall = document.getElementById('rptOverallComment').textContent;
-      const action = document.getElementById('rptActionPlan').textContent;
+      const studentName = document.getElementById('rptStudentTitleName').textContent || "유진";
+      const examName = document.getElementById('rptExamNameTitle').textContent || "영어중간고사";
+      const scoreText = document.getElementById('rptSubScoreText').textContent || "";
+      const motherMsg = document.getElementById('motherComment').textContent || "";
 
-      const kakaoText = `[시애틀 잉글리시 아카데미 - ${studentName} 학생 시험 분석 리포트]
+      const kakaoText = `[Seattle English Academy - ${studentName}이 학부모 리포트]
 
-안녕하세요 학부모님, 시애틀 잉글리시 아카데미입니다.
-${studentName} 학생의 [${examBadge}] 정밀 분석 결과를 안내해 드립니다.
+어머니, ${studentName}이 오늘 친 ${examName}는 [${scoreText.trim()}]입니다.
 
-■ 성적/오답: 추정 점수 ${score}
-■ 담당 교사 총평:
-${overall}
+■ 어머니께 드리는 말씀:
+${motherMsg.trim()}
 
-■ 1:1 보완 클리닉 지도 계획:
-${action}
+■ 향후 지도 계획:
+${studentName}이의 더 높은 목표를 향해 학원에서 항상 밀착 지도하겠습니다. 
+자세한 리포트는 첨부 이미지 카드를 확인해 주세요! 
 
-항상 학생의 성장을 위해 최선을 다하겠습니다. 감사합니다.`;
+감사합니다.
+Seattle English Academy ♡`;
 
       const textarea = document.createElement('textarea');
       textarea.value = kakaoText;
@@ -771,20 +846,21 @@ ${action}
       document.execCommand('copy');
       document.body.removeChild(textarea);
 
-      alert("학부모 카카오톡/문자 발송용 텍스트가 클립보드에 복사되었습니다!");
+      alert("학부모 카카오톡 전송용 요약 문구가 클립보드에 복사되었습니다!");
     });
 
-    // Download Report Image / PDF
+    // Download High Resolution Report Image
     document.getElementById('downloadPdfBtn').addEventListener('click', () => {
       const reportPaper = document.getElementById('reportPaper');
-      const studentName = document.getElementById('studentName').value || "학생";
+      const studentName = document.getElementById('rptStudentTitleName').textContent || "학생";
 
       html2canvas(reportPaper, {
-        backgroundColor: '#181932',
-        scale: 2
+        backgroundColor: '#070b16',
+        scale: 3,
+        useCORS: true
       }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `${studentName}_시험분석_학부모리포트.png`;
+        link.download = `${studentName}_영어시험_학부모리포트.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
@@ -803,6 +879,15 @@ ${action}
         text.textContent = "라이트 모드";
       }
     });
+
+    // Initial Auto Generation Preview
+    window.onload = function() {
+      currentAnalysisData = generateAnalysisResult();
+      renderAnalysisAndReport(currentAnalysisData);
+      emptyState.classList.add('hidden');
+      viewTabs.classList.remove('hidden');
+      parentReportContainer.classList.remove('hidden');
+    }
   </script>
 </body>
 </html>
